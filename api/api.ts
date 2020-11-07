@@ -1,16 +1,16 @@
 import fetch from 'node-fetch'
 
 export type Player = {
-    element: Number; // id
-    position: Number;
-    name: String;
-    currentScore: Number;
-    totalScore?: Number;
+    element: number; // id
+    position: number;
+    name: string;
+    currentScore: number;
+    totalScore?: number;
 }
 
 export type Team = {
-    id: Number;
-    name: String;
+    id: number;
+    name: string;
     currentGameweekTeam: Array<Player>;
 }
 
