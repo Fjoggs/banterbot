@@ -1,16 +1,18 @@
 import { response } from 'express';
 import * as Koa from 'koa'
 import * as Router from 'koa-router';
-import fetch from 'node-fetch'
 
-
-import { getData } from './api/api';
+import { getAsyncData } from './api/api';
 
 const app = new Koa()
 const router = new Router<Koa.DefaultState, Koa.Context>();
 
-router.get('/', async (ctx, next) => {
-    ctx.body = getData()
+let data = {}
+const fetchData = async () => data = await getAsyncData()
+fetchData()
+
+router.get('/', (ctx, next) => {
+    ctx.body = data;
 });
 
 app.use(router.routes())
