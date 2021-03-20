@@ -52,6 +52,7 @@ export const getAsyncData = async () => {
   );
   const json = await response.json();
   state.playerData = json.elements;
+  console.log('json', json.events.current)
   state.currentGameweek = json.events.current;
   state.fantasyTeams = await getLeagueInfo();
   state.fantasyTeams.forEach((fantasyTeam) => {
@@ -130,9 +131,9 @@ const gameweekScore = async (fantasyTeam: FantasyTeam) => {
 export const getLiveData = async () => {
   let json = [];
   try {
-    const data = await fetch(
-      `https://draft.premierleague.com/api/event/8/live`
-    );
+    const url = `https://draft.premierleague.com/api/event/${state.currentGameweek}/live`
+    console.log('getting events for url', url)
+    const data = await fetch(url);
     json = await data.json();
   } catch (error) {
     console.log("shit hit the fan ", error);
@@ -140,40 +141,43 @@ export const getLiveData = async () => {
   return json;
 };
 
-export const checkForEvents = (data): Array<string> => {
-  console.log("checking for events");
+export const checkForEvents = (data, test = false): Array<string> => {
+  console.log("checking for events", data);
   const elements = data.elements;
   let events = [];
-  state.activePlayers.forEach((player) => {
-    const eventList = elements[player.element].explain[0][0] || [];
-    if (eventList.length > 1) {
-      if (eventList.length > player.events) {
-        const diff = eventList.length - player.events;
-        console.log("player.events", player.events);
-        console.log("eventList", eventList);
-        console.log("diff", diff);
-        console.log("eventlist.length - 1", eventList.length - 1);
-        console.log("eventlist.length - diff", eventList.length - diff);
-        for (let i = eventList.length - 1; i >= eventList.length - diff; i--) {
-          const event = eventList[i];
-          console.log("event", event);
-          state.activePlayers.delete(player);
-          let updatedPlayer = player;
-          updatedPlayer.events = eventList.length;
-          state.activePlayers.add(updatedPlayer);
-          if (event.stat === "penalties_saved") {
-            events.push(`${player.name} redda akkurat straffe!`);
-          } else if (event.stat === "goals_scored") {
-            events.push(`Golazo ${player.name}`);
-          } else if (event.stat === "red_cards") {
-            events.push(`Off you pop ${player.name}`);
-          } else if (event.stat === "penalties_missed") {
-            events.push(`${player.name} pls`);
+  if (state.activePlayers) {
+    state.activePlayers.forEach((player) => {
+      if (elements) {
+        if (elements[player.element]) {
+          let eventList = [];
+          if (elements[player.element].explain[0] && elements[player.element].explain[0][0]) {
+            eventList = elements[player.element].explain[0][0];
+          }
+          if (eventList.length > 1) {
+            if (eventList.length > player.events) {
+              const diff = eventList.length - player.events;
+              for (let i = eventList.length - 1; i >= eventList.length - diff; i--) {
+                const event = eventList[i];
+                state.activePlayers.delete(player);
+                let updatedPlayer = player;
+                updatedPlayer.events = eventList.length;
+                state.activePlayers.add(updatedPlayer);
+                if (event.stat === "penalties_saved") {
+                  events.push(`${player.name} redda akkurat straffe!`);
+                } else if (event.stat === "goals_scored") {
+                  events.push(`Golazo ${player.name}`);
+                } else if (event.stat === "red_cards") {
+                  events.push(`Off you pop ${player.name}`);
+                } else if (event.stat === "penalties_missed") {
+                  events.push(`${player.name} pls`);
+                }
+              }
+            }
           }
         }
       }
-    }
-  });
+    });
+  }
   console.log("events", events);
   return events;
 };

@@ -48,7 +48,7 @@ export const luckernoobOfTheWeek = () => {
     const format = currentAmount > 1 ? "strafferedninger" : "strafferedning";
     return `Ukas luckernoob er "${currentLuckernoob}" med ${currentAmount} ${format}`;
   } else {
-    return "Kun noobs den uka";
+    return "Kun noobs denne uka";
   }
 };
 
@@ -71,4 +71,4 @@ export const luckernoobOfTheWeek2 = () => {
   }
 };
 
-export const essentialOfTheWeek = () => {};
+export const essentialOfTheWeek = () => { };
