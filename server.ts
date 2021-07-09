@@ -7,6 +7,7 @@ import {
   getLiveData,
   GameState,
 } from "./api/api";
+import BanterBotDB from "./api/db";
 // import {
 //   fetchData,
 //   luckernoobOfTheWeek,
@@ -17,13 +18,15 @@ import {
 const app = new Koa();
 const router = new Router<Koa.DefaultState, Koa.Context>();
 
+const db = new BanterBotDB();
+
 let state: GameState;
 
 let liveData = {};
 const getData = async () => {
   state = await getAsyncData();
   liveData = await getLiveData();
-}
+};
 getData();
 
 router.get("/", (ctx, next) => {
@@ -47,7 +50,7 @@ router.get("/live", (ctx, next) => {
   ctx.body = events;
 });
 
-router.get('/live1', (ctx, next) => {
+router.get("/live1", (ctx, next) => {
   const data = {
     elements: {
       287: {
@@ -73,12 +76,12 @@ router.get('/live1', (ctx, next) => {
       },
     },
   };
-  const events = checkForEvents(data, true)
-  ctx.body = events
-  ctx.body = events
-})
+  const events = checkForEvents(data, true);
+  ctx.body = events;
+  ctx.body = events;
+});
 
-router.get('/live2', (ctx, next) => {
+router.get("/live2", (ctx, next) => {
   const data = {
     elements: {
       287: {
@@ -110,9 +113,60 @@ router.get('/live2', (ctx, next) => {
       },
     },
   };
-  const events = checkForEvents(data, true)
-  ctx.body = events
-})
+  const events = checkForEvents(data, true);
+  ctx.body = events;
+});
+
+router.get("/db/challenge/insert", (ctx, next) => {
+  db.addChallenge("testname");
+  ctx.status = 200;
+});
+
+router.get("/db/challenge/testname", (ctx, next) => {
+  db.getChallenge("testname");
+  ctx.body = 200;
+});
+
+router.get("/db/challenge/all", (ctx, next) => {
+  db.getChallenges();
+  const challenges = db.getChallengesList();
+  console.log("challenges in server", challenges);
+  ctx.body = challenges;
+});
+
+router.get("/db/score/insert", (ctx, next) => {
+  db.addScore(2, 1, 50);
+  ctx.status = 200;
+});
+
+router.get("/db/score/", (ctx, next) => {
+  const score = db.getScore(1, 1);
+  console.log("score", score);
+  ctx.body = score;
+});
+
+router.get("/db/score/all", (ctx, next) => {
+  db.getScores();
+  const scores = db.getScoreList();
+  console.log("Scores", scores);
+  let result = {};
+  scores.forEach((score) => {
+    if (!result[score.challengeId]) {
+      result[score.challengeId] = [
+        {
+          player: score.name,
+          score: score.score,
+        },
+      ];
+    } else {
+      result[score.challengeId].push({
+        player: score.name,
+        score: score.score,
+      });
+    }
+  });
+  ctx.body = result;
+});
 
 app.use(router.routes()).use(router.allowedMethods());
 

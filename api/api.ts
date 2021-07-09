@@ -52,7 +52,7 @@ export const getAsyncData = async () => {
   );
   const json = await response.json();
   state.playerData = json.elements;
-  console.log('json', json.events.current)
+  console.log("json", json.events.current);
   state.currentGameweek = json.events.current;
   state.fantasyTeams = await getLeagueInfo();
   state.fantasyTeams.forEach((fantasyTeam) => {
@@ -67,13 +67,17 @@ const getLeagueInfo = async () => {
     "https://draft.premierleague.com/api/league/46578/details"
   );
   const leagueDetails = await data.json();
-  leagueDetails.league_entries.forEach((fantasyTeam) => {
-    fantasyTeams.push({
-      id: fantasyTeam.entry_id,
-      name: fantasyTeam.entry_name,
-      currentGameweekTeam: [],
+  try {
+    leagueDetails.league_entries.forEach((fantasyTeam) => {
+      fantasyTeams.push({
+        id: fantasyTeam.entry_id,
+        name: fantasyTeam.entry_name,
+        currentGameweekTeam: [],
+      });
     });
-  });
+  } catch (error) {
+    console.log("shit went wrong!", error);
+  }
   return fantasyTeams;
 };
 
@@ -131,8 +135,8 @@ const gameweekScore = async (fantasyTeam: FantasyTeam) => {
 export const getLiveData = async () => {
   let json = [];
   try {
-    const url = `https://draft.premierleague.com/api/event/${state.currentGameweek}/live`
-    console.log('getting events for url', url)
+    const url = `https://draft.premierleague.com/api/event/${state.currentGameweek}/live`;
+    console.log("getting events for url", url);
     const data = await fetch(url);
     json = await data.json();
   } catch (error) {
@@ -150,13 +154,20 @@ export const checkForEvents = (data, test = false): Array<string> => {
       if (elements) {
         if (elements[player.element]) {
           let eventList = [];
-          if (elements[player.element].explain[0] && elements[player.element].explain[0][0]) {
+          if (
+            elements[player.element].explain[0] &&
+            elements[player.element].explain[0][0]
+          ) {
             eventList = elements[player.element].explain[0][0];
           }
           if (eventList.length > 1) {
             if (eventList.length > player.events) {
               const diff = eventList.length - player.events;
-              for (let i = eventList.length - 1; i >= eventList.length - diff; i--) {
+              for (
+                let i = eventList.length - 1;
+                i >= eventList.length - diff;
+                i--
+              ) {
                 const event = eventList[i];
                 state.activePlayers.delete(player);
                 let updatedPlayer = player;
