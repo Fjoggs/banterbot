@@ -12,6 +12,7 @@ const { JSDOM } = jsdom;
 
 import fetch from "node-fetch";
 import BanterBotDB from "../api/db";
+import { addBet, addChallenge } from "../api/db/challenges";
 
 const client = new Discord.Client();
 
@@ -207,6 +208,32 @@ client.on("message", (msg) => {
   } else if (msg.content == "!challenges refresh") {
     db.getChallenges();
     testChannel.send("Updating table");
+  } else if (msg.content.toLowerCase().startsWith("!newbet")) {
+    console.log('msg.content', msg.content)
+    const split = msg.content.split('"').filter(content => content.trim().length > 0);
+    const name = split[1];
+    const type = split[2]
+    console.log('split', split)
+    if (type === 'ja/nei' || 'yes/no') {
+      addChallenge(name, 'yes/no', (challengeId) => {
+        testChannel.send(`La til ja/nei bet med navn ${name} og id ${challengeId}`);
+      })
+    } else {
+      testChannel.send(`La til bet med navn ${name}`);
+    }
+  } else if (msg.content.toLowerCase().startsWith("!bet")) {
+    if (msg.content.toLocaleLowerCase() === '!bet') {
+      testChannel.send('Syntax: !bet betId "din bet her"');
+    } else {
+      const playerIds = {
+        'Fjoggs': 1,
+      }
+      const split = msg.content.split('"').filter(content => content.trim().length > 0);
+      const challengeId = Number(split[1]);
+      const bet = split[2];
+      addBet(challengeId, playerIds[msg.author.username], bet)
+      msg.author.send(`${msg.author.username} betta **${bet}** på ${challengeId}`)
+    } 0
   }
 });
 

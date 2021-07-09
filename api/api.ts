@@ -182,17 +182,19 @@ export const getMessagesWithState = (events, incomingState) => {
 }
 
 export const getMessages = (events): Array<String> => {
-  events.forEach((event: { stat: string; playerName: any; }) => {
-    if (event.stat === "penalties_saved") {
-      state.messages.push(`${event.playerName} redda akkurat straffe!`);
-    } else if (event.stat === "goals_scored") {
-      state.messages.push(`Golazo ${event.playerName}`);
-    } else if (event.stat === "red_cards") {
-      state.messages.push(`Off you pop ${event.playerName}`);
-    } else if (event.stat === "penalties_missed") {
-      state.messages.push(`${event.playerName} pls`);
-    }
-  });
+  if (events?.length > 1) {
+    events.forEach((event: { stat: string; playerName: any; }) => {
+      if (event.stat === "penalties_saved") {
+        state.messages.push(`${event.playerName} redda akkurat straffe!`);
+      } else if (event.stat === "goals_scored") {
+        state.messages.push(`Golazo ${event.playerName}`);
+      } else if (event.stat === "red_cards") {
+        state.messages.push(`Off you pop ${event.playerName}`);
+      } else if (event.stat === "penalties_missed") {
+        state.messages.push(`${event.playerName} pls`);
+      }
+    });
+  }
   return state.messages;
 }
 
@@ -207,46 +209,46 @@ export const checkForEvents2 = (data): Array<string> => {
   console.log("checking for events");
   const elements = data.elements;
   let events = [];
-  if (state.activePlayers) {
-    state.activePlayers.forEach((player) => {
-      if (elements) {
-        if (elements[player.element]) {
-          let eventList = [];
-          if (
-            elements[player.element].explain[0] &&
-            elements[player.element].explain[0][0]
-          ) {
-            eventList = elements[player.element].explain[0][0];
-          }
-          if (eventList.length > 1) {
-            if (eventList.length > player.events) {
-              const diff = eventList.length - player.events;
-              for (
-                let i = eventList.length - 1;
-                i >= eventList.length - diff;
-                i--
-              ) {
-                const event = eventList[i];
-                state.activePlayers.delete(player);
-                let updatedPlayer = player;
-                updatedPlayer.events = eventList.length;
-                state.activePlayers.add(updatedPlayer);
-                if (event.stat === "penalties_saved") {
-                  events.push(`${player.name} redda akkurat straffe!`);
-                } else if (event.stat === "goals_scored") {
-                  events.push(`Golazo ${player.name}`);
-                } else if (event.stat === "red_cards") {
-                  events.push(`Off you pop ${player.name}`);
-                } else if (event.stat === "penalties_missed") {
-                  events.push(`${player.name} pls`);
-                }
-              }
-            }
-          }
-        }
-      }
-    });
-  }
+  // if (state.activePlayers) {
+  //   state.activePlayers.forEach((player) => {
+  //     if (elements) {
+  //       if (elements[player.element]) {
+  //         let eventList = [];
+  //         if (
+  //           elements[player.element].explain[0] &&
+  //           elements[player.element].explain[0][0]
+  //         ) {
+  //           eventList = elements[player.element].explain[0][0];
+  //         }
+  //         if (eventList.length > 1) {
+  //           if (eventList.length > player.events) {
+  //             const diff = eventList.length - player.events;
+  //             for (
+  //               let i = eventList.length - 1;
+  //               i >= eventList.length - diff;
+  //               i--
+  //             ) {
+  //               const event = eventList[i];
+  //               state.activePlayers.delete(player);
+  //               let updatedPlayer = player;
+  //               updatedPlayer.events = eventList.length;
+  //               state.activePlayers.add(updatedPlayer);
+  //               if (event.stat === "penalties_saved") {
+  //                 events.push(`${player.name} redda akkurat straffe!`);
+  //               } else if (event.stat === "goals_scored") {
+  //                 events.push(`Golazo ${player.name}`);
+  //               } else if (event.stat === "red_cards") {
+  //                 events.push(`Off you pop ${player.name}`);
+  //               } else if (event.stat === "penalties_missed") {
+  //                 events.push(`${player.name} pls`);
+  //               }
+  //             }
+  //           }
+  //         }
+  //       }
+  //     }
+  //   });
+  // }
   console.log("events", events);
   return events;
 };

@@ -1,6 +1,6 @@
-INSERT INTO Player (name) 
+INSERT INTO players (name) 
 VALUES
-    ('Fjogen'),
+    ('Fjoggs'),
     ('nwbi'),
     ('FN'),
     ('Vimbs'),
@@ -10,4 +10,6 @@ VALUES
     ('taxi'),
     ('Nuppe'),
     ('biten'),
-    ('gody');
+    ('gody'),
+    ('Molbs'),
+    ('Juell');

@@ -24,16 +24,32 @@ let challenges: Challenge[] = [];
 let scores: Score[] = [];
 
 export default class BanterBotDB {
-  constructor() {}
+  constructor() { }
 
-  addChallenge(name: string): void {
+  // addChallenge(name: string): void {
+  //   let db = new sqlite3.Database("./banterbot-database.db");
+  //   db.serialize(() => {
+  //     console.log(`Inserting ${name} into db`);
+  //     db.run("INSERT INTO Challenge (name) VALUES(?)", [name], (error) => {
+  //       if (error) {
+  //         console.log("Something went wrong: ", error);
+  //       } else {
+  //         console.log("Inserted challenge with name and id:  ", name);
+  //       }
+  //     });
+  //   });
+  //   db.close();
+  // }
+
+  addBet(challengeId: number, playerId: number, option: string): void {
     let db = new sqlite3.Database("./banterbot-database.db");
     db.serialize(() => {
-      db.run("INSERT INTO Challenge (name) VALUES(?)", [name], (error) => {
+      console.log(`Inserting ${name} into db`);
+      db.run("INSERT INTO bets (challengeId, playerId, option) VALUES(?, ?, ?)", [challengeId, playerId, option], (error) => {
         if (error) {
           console.log("Something went wrong: ", error);
         } else {
-          console.log("Inserted challenge with name and id:  ", name);
+          console.log("Inserted bet with challengeid, playerid and option:  ", challengeId, playerId, option);
         }
       });
     });
