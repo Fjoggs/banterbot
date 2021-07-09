@@ -5,15 +5,15 @@ export type Player = {
   position: number;
   name: string;
   currentScore: number;
-  events: number;
+  events: Event[];
   totalScore?: number;
   penaltySave?: number;
   penaltyMiss?: number;
   minutesPlayed?: number;
+  messagesSent: number;
 };
 
 type Event = {
-  name: string;
   points: number;
   value: number;
   stat: string;
@@ -32,6 +32,7 @@ export type GameState = {
   currentGameweek: number;
   fantasyTeams: Array<FantasyTeam>;
   activePlayers: Set<Player>;
+  messages: string[];
 };
 
 export type PlayerData = {
@@ -44,6 +45,7 @@ let state: GameState = {
   currentGameweek: 0,
   fantasyTeams: [],
   activePlayers: new Set(),
+  messages: []
 };
 
 export const getAsyncData = async () => {
@@ -110,10 +112,11 @@ const getPlayerInfo = async (fantasyTeam, player: Player) => {
         position: player.position,
         name: data.second_name,
         currentScore: lastScore,
-        events: 0,
+        events: [],
         penaltySave: lastMatch.penalties_saved,
         penaltyMiss: lastMatch.penalties_missed,
         minutesPlayed: lastMatch.minutes,
+        messagesSent: 0
       };
       state.activePlayers.add(currentPlayer);
       counter = counter + 1;
@@ -145,8 +148,63 @@ export const getLiveData = async () => {
   return json;
 };
 
-export const checkForEvents = (data, test = false): Array<string> => {
-  console.log("checking for events", data);
+export const checkForEventsWithState = (data, incomingState) => {
+  state = incomingState;
+  checkForEvents(data)
+}
+
+export const checkForEvents = (data) => {
+  const elements = data.elements;
+  if (state.activePlayers) {
+    state.activePlayers.forEach(player => {
+      const eventList = elements[player.element].explain[0][0] || [];
+      if (eventList.length > player.events) {
+        eventList.forEach(event => {
+          state.activePlayers.delete(player)
+          let updatedPlayer = player
+          updatedPlayer.events.push({
+            stat: event.stat,
+            points: event.points,
+            value: event.value
+          })
+          state.activePlayers.add(player)
+        });
+      }
+    })
+  }
+}
+
+export const getState = () => state;
+
+export const getMessagesWithState = (events, incomingState) => {
+  state = incomingState
+  return getMessages(events)
+}
+
+export const getMessages = (events): Array<String> => {
+  events.forEach((event: { stat: string; playerName: any; }) => {
+    if (event.stat === "penalties_saved") {
+      state.messages.push(`${event.playerName} redda akkurat straffe!`);
+    } else if (event.stat === "goals_scored") {
+      state.messages.push(`Golazo ${event.playerName}`);
+    } else if (event.stat === "red_cards") {
+      state.messages.push(`Off you pop ${event.playerName}`);
+    } else if (event.stat === "penalties_missed") {
+      state.messages.push(`${event.playerName} pls`);
+    }
+  });
+  return state.messages;
+}
+
+export const resetMessages = () => (state.messages = [])
+
+export const updateGameweekState = (element: number) => {
+
+}
+
+
+export const checkForEvents2 = (data): Array<string> => {
+  console.log("checking for events");
   const elements = data.elements;
   let events = [];
   if (state.activePlayers) {

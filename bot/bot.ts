@@ -5,7 +5,7 @@ import {
   rittardOfTheWeek,
   topDickOfTheWeek,
 } from "../api/parser";
-import { checkForEvents, getLiveData } from "../api/api";
+import { checkForEvents, getLiveData, getMessages, resetMessages } from "../api/api";
 
 const jsdom = require("jsdom");
 const { JSDOM } = jsdom;
@@ -230,12 +230,15 @@ const getBilic = async () => {
 
 client.login(process.env.TOKEN);
 
-const poll = setInterval(() => {
+
+setInterval(() => {
+  console.log('polling for messages')
   const events = checkForEvents(liveData);
-  console.log("events", events);
-  events.forEach((event) => {
+  const messages = getMessages(events)
+  messages.forEach(message => {
     if (!mute) {
-      channel.send(event);
+      channel.send(message);
     }
   });
+  resetMessages()
 }, 60 * 1000); // Every minute
