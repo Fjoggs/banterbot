@@ -1,7 +1,8 @@
 CREATE TABLE [challenges] (
     	[challengeId] INTEGER  NOT NULL PRIMARY KEY,
 	    [name] NVARCHAR(50)  NOT NULL,
-	    [options] NVARCHAR(100)  NOT NULL
+	    [options] NVARCHAR(100)  NOT NULL,
+		[result] NVARCHAR(100) NULL
 );
 
 CREATE TABLE [bets] (

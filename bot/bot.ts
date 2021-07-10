@@ -5,14 +5,27 @@ import {
   rittardOfTheWeek,
   topDickOfTheWeek,
 } from "../api/parser";
-import { checkForEvents, getLiveData, getMessages, resetMessages } from "../api/api";
+import {
+  checkForEvents,
+  getLiveData,
+  getMessages,
+  resetMessages,
+} from "../api/api";
 
 const jsdom = require("jsdom");
 const { JSDOM } = jsdom;
 
 import fetch from "node-fetch";
 import BanterBotDB from "../api/db";
-import { addBet, addChallenge } from "../api/db/challenges";
+import {
+  addBet,
+  addChallenge,
+  deleteChallenge,
+  finishChallenge,
+  getBets,
+  getChallenges,
+  getWinners,
+} from "../api/db/challenges";
 
 const client = new Discord.Client();
 
@@ -26,6 +39,38 @@ fetchLiveData();
 let channel;
 let testChannel;
 let mute = true;
+
+const nameToPlayerIds = {
+  Fjoggs: 1,
+  nwbi: 2,
+  FN: 3,
+  Vimbs: 4,
+  Ulfos: 5,
+  dun: 6,
+  Torp: 7,
+  "ILLeGaL BaNnan": 8,
+  Nuppe: 9,
+  biten: 10,
+  gody: 11,
+  Molbs: 12,
+  Juell: 13,
+};
+
+const playersIdsToName = {
+  1: "Fjoggs",
+  2: "nwbi",
+  3: "FN",
+  4: "Vimbs",
+  5: "Ulfos",
+  6: "dun",
+  7: "Torp",
+  8: "ILLeGaL BaNnan",
+  9: "Nuppe",
+  10: "biten",
+  11: "gody",
+  12: "Molbs",
+  13: "Juell",
+};
 
 const db = new BanterBotDB();
 
@@ -189,51 +234,115 @@ client.on("message", (msg) => {
       })
     );
   } else if (msg.content == "!challenges") {
-    db.getScores();
-    const scores = db.getScoreList();
-    const embed = new Discord.MessageEmbed().setTitle("Challenges").addFields(
-      scores.map((score) => {
-        return {
-          name: score.name,
-          value: score.score,
-        };
-      })
-    );
-    testChannel.send(
-      `Challenges:\n${scores.map(
-        (score) => `Player: ${score.name}, Score: ${score.score}\n`
-      )}`,
-      { code: true }
-    );
-  } else if (msg.content == "!challenges refresh") {
-    db.getChallenges();
-    testChannel.send("Updating table");
-  } else if (msg.content.toLowerCase().startsWith("!newbet")) {
-    console.log('msg.content', msg.content)
-    const split = msg.content.split('"').filter(content => content.trim().length > 0);
-    const name = split[1];
-    const type = split[2]
-    console.log('split', split)
-    if (type === 'ja/nei' || 'yes/no') {
-      addChallenge(name, 'yes/no', (challengeId) => {
-        testChannel.send(`La til ja/nei bet med navn ${name} og id ${challengeId}`);
-      })
+    getChallenges((challenges) => {
+      channel.send(
+        `\n${challenges.map(
+          (challenge) =>
+            `Navn: ${challenge.name}, Id: ${challenge.challengeId} \n`
+        )}`,
+        { code: true }
+      );
+    });
+  } else if (msg.content.toLowerCase().startsWith("!+challenge")) {
+    if (msg.content.toLowerCase() === "!+challenge") {
+      channel.send(
+        'Syntax: !+challenge "navn på challenge" "valg-alternativer (premade varianter: ja/nei, alle)"'
+      );
     } else {
-      testChannel.send(`La til bet med navn ${name}`);
+      console.log("msg.content", msg.content);
+      const split = msg.content
+        .split('"')
+        .filter((content) => content.trim().length > 0);
+      const name = split[1];
+      const type = split[2];
+      console.log("split", split);
+      if (type === "ja/nei") {
+        addChallenge(name, type, (challengeId) => {
+          channel.send(
+            `La til "${type}" challenge med navn "${name}" og id **${challengeId}**`
+          );
+        });
+      } else {
+        channel.send(`La til challenge med navn ${name}`);
+      }
+    }
+  } else if (msg.content.toLowerCase().startsWith("!-challenge")) {
+    if (msg.content.toLowerCase() === "!-challenge") {
+      channel.send(
+        'Syntax: !-challenge "challengeId" (funker kun forn onkel fjoggs)'
+      );
+    } else {
+      if (msg.author.username === "Fjoggs") {
+        const split = msg.content.split('"');
+        const challengeId = Number(split[1]);
+        deleteChallenge(challengeId, (message) => {
+          channel.send(message);
+        });
+      }
     }
   } else if (msg.content.toLowerCase().startsWith("!bet")) {
-    if (msg.content.toLocaleLowerCase() === '!bet') {
-      testChannel.send('Syntax: !bet betId "din bet her"');
+    if (msg.content.toLowerCase() === "!bet") {
+      channel.send('Syntax: !bet "betId" "din bet her"');
+    } else if (msg.content.toLowerCase() === "!bets") {
+      getBets((bets) => {
+        channel.send(
+          `\n${bets.map(
+            (bet) =>
+              `ChallengeId: ${bet.challengeId}, Kis: ${
+                playersIdsToName[bet.playerId]
+              }, Bet: ${bet.bet} \n`
+          )}`,
+          { code: true }
+        );
+      });
     } else {
-      const playerIds = {
-        'Fjoggs': 1,
-      }
-      const split = msg.content.split('"').filter(content => content.trim().length > 0);
+      const split = msg.content
+        .split('"')
+        .filter((content) => content.trim().length > 0);
+      console.log("split", split);
+      console.log("split.comnibed");
       const challengeId = Number(split[1]);
       const bet = split[2];
-      addBet(challengeId, playerIds[msg.author.username], bet)
-      msg.author.send(`${msg.author.username} betta **${bet}** på ${challengeId}`)
-    } 0
+      addBet(challengeId, nameToPlayerIds[msg.author.username], bet);
+      msg.author.send(
+        `${msg.author.username} betta **${bet}** på challenge nummer ${challengeId}`
+      );
+    }
+    0;
+  } else if (msg.content.toLowerCase().startsWith("!donechallenge")) {
+    if (msg.content.toLowerCase() === "!donechallenge") {
+      channel.send('Syntax: !donechallenge "challengeId" "resultat"');
+    } else {
+      const split = msg.content
+        .split('"')
+        .filter((content) => content.trim().length > 0);
+      console.log("split", split);
+      console.log("split.comnibed");
+      const challengeId = Number(split[1]);
+      const result = split[2];
+      finishChallenge(challengeId, result, () => {
+        let losers = [];
+        let winners = [];
+        getWinners(1, (rows) => {
+          rows.forEach((row) => {
+            if (row.bet === row.result) {
+              winners.push(playersIdsToName[row.playerId]);
+            } else {
+              losers.push(playersIdsToName[row.playerId]);
+            }
+          });
+
+          channel.send(
+            `+rep: ${
+              winners.length > 0 ? `**${winners}**` : "Assa hallo"
+            }. -rep: ${
+              losers.length > 0 ? `**${losers}**` : "Ingen losers pog"
+            }`
+          );
+        });
+      });
+    }
+    0;
   }
 });
 
@@ -257,15 +366,14 @@ const getBilic = async () => {
 
 client.login(process.env.TOKEN);
 
-
 setInterval(() => {
-  console.log('polling for messages')
+  console.log("polling for messages");
   const events = checkForEvents(liveData);
-  const messages = getMessages(events)
-  messages.forEach(message => {
+  const messages = getMessages(events);
+  messages.forEach((message) => {
     if (!mute) {
       channel.send(message);
     }
   });
-  resetMessages()
+  resetMessages();
 }, 60 * 1000); // Every minute

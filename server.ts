@@ -8,7 +8,7 @@ import {
   GameState,
 } from "./api/api";
 import BanterBotDB from "./api/db";
-import { addChallenge } from "./api/db/challenges";
+import { addChallenge, getWinners } from "./api/db/challenges";
 // import {
 //   fetchData,
 //   luckernoobOfTheWeek,
@@ -119,7 +119,7 @@ router.get("/live2", (ctx, next) => {
 });
 
 router.get("/db/challenge/insert", (ctx, next) => {
-  addChallenge("testname");
+  addChallenge("testname", "", () => {});
   ctx.status = 200;
 });
 
@@ -144,6 +144,21 @@ router.get("/db/score/", (ctx, next) => {
   const score = db.getScore(1, 1);
   console.log("score", score);
   ctx.body = score;
+});
+
+router.get("/db/winners/", (ctx, next) => {
+  let losers = [];
+  let winners = [];
+  getWinners(1, (rows) => {
+    rows.forEach((row) => {
+      if (row.bet === row.result) {
+        winners.push(row.playerId);
+      } else {
+        losers.push(row.playerId);
+      }
+    });
+  });
+  ctx.status = 200;
 });
 
 router.get("/db/score/all", (ctx, next) => {
