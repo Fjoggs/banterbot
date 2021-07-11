@@ -1,15 +1,15 @@
-INSERT INTO players (name) 
+INSERT INTO players (name, rep) 
 VALUES
-    ('Fjoggs'),
-    ('nwbi'),
-    ('FN'),
-    ('Vimbs'),
-    ('Ulfos'),
-    ('dun'),
-    ('Torp'),
-    ('taxi'),
-    ('Nuppe'),
-    ('biten'),
-    ('gody'),
-    ('Molbs'),
-    ('Juell');
+    ('Fjoggs', 0),
+    ('nwbi', 0),
+    ('FN', 0),
+    ('Vimbs', 0),
+    ('Ulfos', 0),
+    ('dun', 0),
+    ('Torp', 0),
+    ('taxi', 0),
+    ('Nuppe', 0),
+    ('biten', 0),
+    ('gody', 0),
+    ('Molbs', 0),
+    ('Juell', 0);
