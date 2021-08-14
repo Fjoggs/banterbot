@@ -26,7 +26,7 @@ export const checkForBanter = (msg: Discord.Message, channel, client) => {
         const luckyNumber = Math.floor(Math.random() * response.length);
         channel.send(`Soleklar ${response[luckyNumber]}`);
     } else if (messageIncludes('!molbs')) {
-        const essentialArsenalPlayers = ['Laca', 'Tierney', 'Pepe', 'Saka', 'Xhaka'];
+        const essentialArsenalPlayers = ['Laca', 'Tierney', 'Pepe', 'Saka', 'Xhaka', 'White'];
         const randomArsenalPlayer = Math.floor(Math.random() * essentialArsenalPlayers.length);
         const response = [
             '**DOMMER**',

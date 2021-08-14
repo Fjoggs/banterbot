@@ -16,7 +16,7 @@ fetchLiveData();
 
 let channel;
 let testChannel;
-let mute = true;
+let mute = false;
 
 client.on('ready', () => {
     console.log(`Logged in as ${client.user.tag}!`);
@@ -45,11 +45,13 @@ client.login(process.env.TOKEN);
 setInterval(() => {
     console.log('polling for messages');
     const events = checkForEvents(liveData);
+    console.log('events', events)
     const messages = getMessages(events);
+    console.log('messages', messages)
     messages.forEach((message) => {
         if (!mute) {
             channel.send(message);
         }
     });
     resetMessages();
-}, 60 * 1000); // Every minute
+}, 10 * 1000); // Every minute
