@@ -1,5 +1,6 @@
 import * as Koa from 'koa';
 import * as Router from 'koa-router';
+import fetch from 'node-fetch';
 
 import { checkForEvents, getAsyncData, getLiveData, GameState } from './api/api';
 import { getWinners } from './api/db/bets';
@@ -42,7 +43,7 @@ router.get('/live', (ctx, next) => {
 router.get('/live1', (ctx, next) => {
     const data = {
         elements: {
-            287: {
+            290: {
                 explain: [
                     [
                         [
@@ -65,15 +66,15 @@ router.get('/live1', (ctx, next) => {
             },
         },
     };
+    console.log('data', data);
     const events = checkForEvents(data);
-    ctx.body = events;
     ctx.body = events;
 });
 
 router.get('/live2', (ctx, next) => {
     const data = {
         elements: {
-            287: {
+            290: {
                 explain: [
                     [
                         [
@@ -109,6 +110,52 @@ router.get('/live2', (ctx, next) => {
 router.get('/db/challenge/insert', (ctx, next) => {
     addChallenge('testname', '', () => {});
     ctx.status = 200;
+});
+
+router.get('/sperregrensa', (ctx, next) => {
+    const ripParties = [];
+    const happyParties = [];
+    fetch('https://valgresultat.no/api/2021/st').then((response) =>
+        response.json().then((data) => {
+            const parties = data.partier;
+            parties.forEach((party) => {
+                if (party.stemmer.resultat.prosent >= 4) {
+                    happyParties.push(party.id.navn);
+                } else if (party.stemmer.resultat.prosent > 2) {
+                    ripParties.push(party.id.navn);
+                }
+            });
+            let message = 'F i chat til ';
+            ripParties.forEach((party) => {
+                message += `${party}, `;
+            });
+            console.log('message', `${message}og my annet ræl.`);
+        })
+    );
+    ctx.body = happyParties.toString();
+});
+
+router.get('/morna', (ctx, next) => {
+    const mornaJensDate = new Date('01-01-2013').getFullYear();
+    console.log('mornaJens', mornaJensDate);
+    const currentYear = new Date().getFullYear();
+    console.log('currentYear', currentYear);
+    ctx.body = currentYear - mornaJensDate;
+});
+
+router.get('/zap', (ctx, next) => {
+    fetch('https://www.ge.no/api/price/area/NO1').then((response) =>
+        response.json().then((data) => {
+            let totalPrice = 0;
+            let supplierCount = 0;
+            data.forEach((supplier) => {
+                totalPrice += supplier.price;
+                supplierCount++;
+            });
+            const avgPrice = (totalPrice / supplierCount).toFixed(2);
+            console.log('avgPrice', avgPrice);
+        })
+    );
 });
 
 router.get('/db/winners/', (ctx, next) => {

@@ -1,4 +1,5 @@
 import fetch from 'node-fetch';
+import { updateChallenge } from './db/challenges';
 
 export type Player = {
     element: number; // id
@@ -56,6 +57,7 @@ export const getAsyncData = async () => {
     state.currentGameweek = json.events.current;
     state.fantasyTeams = await getLeagueInfo();
     state.fantasyTeams.forEach((fantasyTeam) => {
+        console.log('fantasyTeam', fantasyTeam);
         getGameweekStatsForSingleFantasyTeam(fantasyTeam);
     });
     return state;
@@ -149,28 +151,33 @@ export const checkForEvents = (data) => {
     const elements = data.elements;
     let events = [];
     if (state.activePlayers) {
+        console.log('yes');
         state.activePlayers.forEach((player) => {
-            const eventList = elements[player.element].explain[0][0] || [];
-            if (eventList.length > player.events) {
-                eventList.forEach((event) => {
-                    state.activePlayers.delete(player);
-                    let updatedPlayer = player;
-                    updatedPlayer.events.push({
-                        stat: event.stat,
-                        points: event.points,
-                        value: event.value,
+            try {
+                console.log('hello');
+                const eventList = elements[player.element].explain[0][0] || [];
+                console.log('eventList', eventList);
+                console.log('player.events', player.events);
+                if (eventList.length > player.events.length) {
+                    let updatedPlayer;
+                    eventList.forEach((event) => {
+                        state.activePlayers.delete(player);
+                        updatedPlayer.events.push({
+                            stat: event.stat,
+                            points: event.points,
+                            value: event.value,
+                        });
+                        state.activePlayers.add(updatedPlayer);
                     });
-                    events.push({
-                        stat: event.stat,
-                        playerName: player.name
-                    })
-                    state.activePlayers.add(player);
-                });
+                    console.log('player.events', player.events);
+                    console.log('updatedPlayer', updatedPlayer.events);
+                }
+            } catch {
+                // console.log('error');
             }
         });
     }
-    console.log('events', events)
-    return events;
+    return state;
 };
 
 export const getState = () => state;
@@ -199,7 +206,7 @@ export const getMessages = (events): Array<String> => {
 
 export const resetMessages = () => (state.messages = []);
 
-export const updateGameweekState = (element: number) => { };
+export const updateGameweekState = (element: number) => {};
 
 export const checkForEvents2 = (data): Array<string> => {
     console.log('checking for events');

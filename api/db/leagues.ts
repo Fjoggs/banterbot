@@ -36,9 +36,10 @@ export const changeLeagueRep = (playerId: number, leagueId: number) => {
                 if (error) {
                     console.log('Something went wrong: ', error);
                 } else {
-                    console.log('Changed league rep for player:', playerId);
                     if (this.changes === 0) {
                         insertNewPlayerLeague(playerId, leagueId);
+                    } else {
+                        console.log('Changed league rep for player:', playerId);
                     }
                 }
             }

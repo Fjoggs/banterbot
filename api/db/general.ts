@@ -1,36 +1,36 @@
 import { sqlite3 } from 'sqlite3';
 
-export interface Player {
-    playerId: number;
-    name: string;
-    rep: number;
+export interface RandomEntry {
+    randomId: number;
+    jamesCounter: number;
 }
 
 const sqlite3: sqlite3 = require('sqlite3').verbose();
 
-export const changePlayerTotalRep = (playerId: number) => {
+export const increaseJamesCounter = (callback: Function) => {
     let db = new sqlite3.Database('./banterbot-database.db');
-    console.log('changing rep for player', playerId);
+    console.log('increment james counter by 1');
     db.serialize(() => {
-        db.run('UPDATE players SET rep=rep + 1 WHERE playerId = ?', [playerId], (error) => {
+        db.run('UPDATE random SET jamesCounter = jamesCounter + 1 WHERE randomId = 1', (error) => {
             if (error) {
                 console.log('Something went wrong: ', error);
             } else {
-                console.log('Changed rep for player:  ', playerId);
+                console.log('Increased jamescounter');
+                callback();
             }
         });
     });
     db.close();
 };
 
-export const getPlayers = (callback: Function) => {
+export const getRandom = (callback: Function) => {
     let db = new sqlite3.Database('./banterbot-database.db');
     db.serialize(() => {
-        db.all('SELECT * FROM players ORDER BY rep DESC', [], (error, rows: Array<Player>) => {
+        db.get('SELECT * FROM random WHERE randomId = 1', [], (error, row: RandomEntry) => {
             if (error) {
                 console.log('Something went wrong: ', error);
             } else {
-                callback(rows);
+                callback(row);
             }
         });
     });

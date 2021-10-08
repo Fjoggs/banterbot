@@ -1,5 +1,6 @@
 import * as Discord from 'discord.js';
 import fetch from 'node-fetch';
+import { getRandom, increaseJamesCounter, RandomEntry } from '../api/db/general';
 import { rittardOfTheWeek, topDickOfTheWeek, luckernoobOfTheWeek } from '../api/parser';
 
 const jsdom = require('jsdom');
@@ -25,8 +26,24 @@ export const checkForBanter = (msg: Discord.Message, channel, client) => {
         const response = ['offside', 'onside', 'dive', 'gåll', 'felling'];
         const luckyNumber = Math.floor(Math.random() * response.length);
         channel.send(`Soleklar ${response[luckyNumber]}`);
+    } else if (messageIncludes('!rice')) {
+        const response = ['West Ham', 'Chelsea', 'United', 'City', 'Enga', 'Sleivdal'];
+        const luckyNumber = Math.floor(Math.random() * response.length);
+        channel.send(`Rice til ${response[luckyNumber]}`);
+    } else if (messageIncludes('!nuppe')) {
+        const response = [`DREP 'N. DREP MÆLBS!`];
+        const luckyNumber = Math.floor(Math.random() * response.length);
+        channel.send(response[luckyNumber]);
     } else if (messageIncludes('!molbs')) {
-        const essentialArsenalPlayers = ['Laca', 'Tierney', 'Pepe', 'Saka', 'Xhaka', 'White'];
+        const essentialArsenalPlayers = [
+            'Laca',
+            'Tierney',
+            'Pepe',
+            'Saka',
+            'Xhaka',
+            'White',
+            'Ødegaard',
+        ];
         const randomArsenalPlayer = Math.floor(Math.random() * essentialArsenalPlayers.length);
         const response = [
             '**DOMMER**',
@@ -61,7 +78,10 @@ export const checkForBanter = (msg: Discord.Message, channel, client) => {
         const luckyNumber = Math.floor(Math.random() * response.length);
         channel.send(response[luckyNumber]);
     } else if (messageIncludes('!pog')) {
-        const response = ['https://gfycat.com/wigglyneatgrackle'];
+        const response = [
+            'https://gfycat.com/wigglyneatgrackle',
+            'https://cdn.discordapp.com/attachments/110121552934100992/863911058699714560/pogmobile.gif',
+        ];
         const luckyNumber = Math.floor(Math.random() * response.length);
         channel.send(response[luckyNumber]);
     } else if (messageIncludes('!ramos')) {
@@ -80,19 +100,23 @@ export const checkForBanter = (msg: Discord.Message, channel, client) => {
         const luckyNumber = Math.floor(Math.random() * response.length);
         channel.send(response[luckyNumber]);
     } else if (messageIncludes('!james')) {
-        if (jamesCounter === 1) {
-            channel.send(`James i gresset: ${jamesCounter} gang`);
-        } else {
-            channel.send(`James i gresset: ${jamesCounter} ganger`);
-        }
-    } else if (messageIncludes('!+james')) {
-        jamesCounter++;
+        increaseJamesCounter(() => {
+            getRandom((randomEntry: RandomEntry) => {
+                if (randomEntry.jamesCounter === 0) {
+                    channel.send(`James har spist gress ${randomEntry.jamesCounter} gang`);
+                } else {
+                    channel.send(`James har spist gress ${randomEntry.jamesCounter} ganger`);
+                }
+            });
+        });
     } else if (messageIncludes('!sid')) {
         const club = getBilic();
         // channel.send(`Just nu er sid fan av ${club}`);
     } else if (messageIncludes('!krysset?')) {
         const emoji = client.emojis.cache.find((emoji) => emoji.name === 'thumbsup');
-        channel.send(`Ledig ${emoji}`);
+        channel.send('Ledig');
+    } else if (messageIncludes('!halamadrid')) {
+        channel.send('https://streamable.com/ppeht');
     } else if (messageIncludes('!morata')) {
         const response = [
             'brilliant',
@@ -104,6 +128,40 @@ export const checkForBanter = (msg: Discord.Message, channel, client) => {
         ];
         const luckyNumber = Math.floor(Math.random() * response.length);
         channel.send(`Fyren er ${response[luckyNumber]}`);
+    } else if (messageIncludes('!offyoupop')) {
+        const response = [
+            'https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fi2-prod.mirror.co.uk%2Fincoming%2Farticle6480677.ece%2FALTERNATES%2Fs615%2FRed-card-is-shown-by-referee-Mike-Dean.jpg&f=1&nofb=1',
+            'https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fi.pinimg.com%2Foriginals%2F8a%2F80%2Fc0%2F8a80c0ef0081b2c75d2af1de3ad93f72.jpg&f=1&nofb=1',
+            'https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fim.indiatimes.in%2Ffacebook%2F2019%2FFeb%2Fmike_dean_is_on_99_red_cards_1549428752.jpg&f=1&nofb=1',
+            'https://external-content.duckduckgo.com/iu/?u=http%3A%2F%2Fe1.365dm.com%2F13%2F01%2F660x350%2FMike-Dean_2885945.jpg%3F20130114140727&f=1&nofb=1',
+            'https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fbetszone.co.uk%2Fwp-content%2Fuploads%2F2019%2F02%2FJS51908241.jpg&f=1&nofb=1',
+            'https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Ftse4.mm.bing.net%2Fth%3Fid%3DOIP._U3ay5TUhOLZOa1mUG1LLgHaD4%26pid%3DApi&f=1',
+        ];
+        const luckyNumber = Math.floor(Math.random() * response.length);
+        channel.send(response[luckyNumber]);
+    } else if (messageIncludes('!sperregrensa')) {
+        fetch('https://valgresultat.no/api/2021/st').then((response) =>
+            response.json().then((data) => {
+                const parties = data.partier;
+                const ripParties = [];
+                const happyParties = [];
+                let message = 'F i chat til ';
+                parties.forEach((party) => {
+                    if (party.stemmer.resultat.prosent >= 4) {
+                        happyParties.push(party.id.navn);
+                    } else if (party.stemmer.resultat.prosent > 2) {
+                        message += `${party.id.navn}, `;
+                    }
+                });
+                channel.send(`${message}og my annet ræl.`);
+            })
+        );
+    } else if (messageIncludes('!foxymoxy')) {
+        channel.send('Millionærene.');
+    } else if (messageIncludes('!mornajens')) {
+        const mornaJensYear = new Date('01-01-2013').getFullYear();
+        const yearSince = new Date().getFullYear() - mornaJensYear;
+        channel.send(`${yearSince} år sia morna jens`);
     } else if (messageIncludes('!racetime')) {
         const currentDate = new Date();
         let nextRace;
@@ -129,6 +187,32 @@ export const checkForBanter = (msg: Discord.Message, channel, client) => {
                         break;
                     }
                 }
+            })
+        );
+    } else if (messageIncludes('!zaposlo')) {
+        fetch('https://www.ge.no/api/price/area/NO1').then((response) =>
+            response.json().then((data) => {
+                let totalPrice = 0;
+                let supplierCount = 0;
+                data.forEach((supplier) => {
+                    totalPrice += supplier.price;
+                    supplierCount++;
+                });
+                const avgPrice = (totalPrice / supplierCount).toFixed(2);
+                channel.send(`Snittpris strøm Oslo: ${avgPrice}`);
+            })
+        );
+    } else if (messageIncludes('!zapsvg')) {
+        fetch('https://www.ge.no/api/price/area/NO2').then((response) =>
+            response.json().then((data) => {
+                let totalPrice = 0;
+                let supplierCount = 0;
+                data.forEach((supplier) => {
+                    totalPrice += supplier.price;
+                    supplierCount++;
+                });
+                const avgPrice = (totalPrice / supplierCount).toFixed(2);
+                channel.send(`Snittpris strøm Stavanger: ${avgPrice}`);
             })
         );
     }

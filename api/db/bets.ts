@@ -25,6 +25,24 @@ export const getWinners = (challengeId: number, callback: Function) => {
     let db = new sqlite3.Database('./banterbot-database.db');
     db.serialize(() => {
         db.all(
+            'SELECT playerId, bet, result from bets INNER JOIN challenges USING(challengeId) where challengeId = ?',
+            [challengeId],
+            (error, rows: Array<BetJoinedChallenges>) => {
+                if (error) {
+                    console.log('Something went wrong: ', error);
+                } else {
+                    callback(rows);
+                }
+            }
+        );
+    });
+    db.close();
+};
+
+export const getWinnersInLeague = (challengeId: number, callback: Function) => {
+    let db = new sqlite3.Database('./banterbot-database.db');
+    db.serialize(() => {
+        db.all(
             'SELECT playerId, bet, result, leagueId from bets INNER JOIN challenges USING(challengeId) INNER JOIN league_challenges USING (challengeId) where challengeId = ?',
             [challengeId],
             (error, rows: Array<BetJoinedChallengesJoinedLeagueChallenges>) => {

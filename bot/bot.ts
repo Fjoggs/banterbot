@@ -16,7 +16,8 @@ fetchLiveData();
 
 let channel;
 let testChannel;
-let mute = false;
+let mute = true;
+let currentYear = 2021;
 
 client.on('ready', () => {
     console.log(`Logged in as ${client.user.tag}!`);
@@ -45,13 +46,25 @@ client.login(process.env.TOKEN);
 setInterval(() => {
     console.log('polling for messages');
     const events = checkForEvents(liveData);
-    console.log('events', events)
+    console.log('events', events);
     const messages = getMessages(events);
-    console.log('messages', messages)
+    if (isNewYear(new Date())) {
+        channel.send('https://www.youtube.com/watch?v=on1Arneo-jc');
+    }
     messages.forEach((message) => {
         if (!mute) {
             channel.send(message);
         }
     });
     resetMessages();
-}, 10 * 1000); // Every minute
+}, 60 * 1000); // Every minute
+
+const isNewYear = (date: Date) => {
+    const newYear = date.getFullYear();
+    if (newYear !== currentYear) {
+        currentYear = newYear;
+        return true;
+    } else {
+        return false;
+    }
+};

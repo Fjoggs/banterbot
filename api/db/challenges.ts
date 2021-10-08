@@ -41,9 +41,27 @@ export const getChallenge = (challengeId: number, callback: Function) => {
     db.close();
 };
 
+export const updateChallenge = (challengeId: number, options: string, callback: Function) => {
+    let db = new sqlite3.Database('./banterbot-database.db');
+    db.serialize(() => {
+        db.get(
+            'UPDATE Challenges set options = ? WHERE challengeId = ?',
+            [options, challengeId],
+            (error, row: Challenge) => {
+                if (error) {
+                    console.log('Something went wrong: ', error);
+                } else {
+                    console.log('Updated challenge', challengeId, options);
+                    callback();
+                }
+            }
+        );
+    });
+    db.close();
+};
+
 export const addChallenge = (name: string, options: string, callback: Function) => {
     let db = new sqlite3.Database('./banterbot-database.db');
-    let challengeId;
     db.serialize(() => {
         console.log(`Inserting ${name} into db`);
         db.run(
@@ -55,7 +73,6 @@ export const addChallenge = (name: string, options: string, callback: Function) 
                 } else {
                     console.log('Inserted challenge with name and id:  ', name, this.lastID);
                     callback(this.lastID);
-                    challengeId = this.lastID;
                 }
             }
         );
