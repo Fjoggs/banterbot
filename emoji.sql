@@ -1,0 +1,4 @@
+CREATE TABLE [emoji] (
+        [name] NVARCHAR(100) NOT NULL PRIMARY KEY,
+		[usage] INTEGER NOT NULL
+);

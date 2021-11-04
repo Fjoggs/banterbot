@@ -337,6 +337,7 @@ export const checkForProfeten = (msg: Discord.Message, channel) => {
                                         nameToPlayerIds[msg.author.username],
                                         bet.toLowerCase()
                                     );
+
                                     msg.author.send(
                                         `${msg.author.username} betta **${bet}** på spill nummer ${challengeId}`
                                     );

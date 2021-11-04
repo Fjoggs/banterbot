@@ -53,7 +53,6 @@ export const getAsyncData = async () => {
     const response = await fetch('https://draft.premierleague.com/api/bootstrap-static');
     const json = await response.json();
     state.playerData = json.elements;
-    console.log('json', json.events.current);
     state.currentGameweek = json.events.current;
     state.fantasyTeams = await getLeagueInfo();
     state.fantasyTeams.forEach((fantasyTeam) => {
@@ -133,7 +132,6 @@ export const getLiveData = async () => {
     let json = [];
     try {
         const url = `https://draft.premierleague.com/api/event/${state.currentGameweek}/live`;
-        console.log('getting events for url', url);
         const data = await fetch(url);
         json = await data.json();
     } catch (error) {
@@ -151,13 +149,9 @@ export const checkForEvents = (data) => {
     const elements = data.elements;
     let events = [];
     if (state.activePlayers) {
-        console.log('yes');
         state.activePlayers.forEach((player) => {
             try {
-                console.log('hello');
                 const eventList = elements[player.element].explain[0][0] || [];
-                console.log('eventList', eventList);
-                console.log('player.events', player.events);
                 if (eventList.length > player.events.length) {
                     let updatedPlayer;
                     eventList.forEach((event) => {
@@ -169,8 +163,6 @@ export const checkForEvents = (data) => {
                         });
                         state.activePlayers.add(updatedPlayer);
                     });
-                    console.log('player.events', player.events);
-                    console.log('updatedPlayer', updatedPlayer.events);
                 }
             } catch {
                 // console.log('error');
@@ -209,7 +201,6 @@ export const resetMessages = () => (state.messages = []);
 export const updateGameweekState = (element: number) => {};
 
 export const checkForEvents2 = (data): Array<string> => {
-    console.log('checking for events');
     const elements = data.elements;
     let events = [];
     // if (state.activePlayers) {
@@ -252,6 +243,5 @@ export const checkForEvents2 = (data): Array<string> => {
     //     }
     //   });
     // }
-    console.log('events', events);
     return events;
 };

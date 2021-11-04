@@ -1,6 +1,11 @@
 import * as Discord from 'discord.js';
 import fetch from 'node-fetch';
-import { getRandom, increaseJamesCounter, RandomEntry } from '../api/db/general';
+import {
+    getRandom,
+    increaseJamesCounter,
+    increaseLukakuCounter,
+    RandomEntry,
+} from '../api/db/general';
 import { rittardOfTheWeek, topDickOfTheWeek, luckernoobOfTheWeek } from '../api/parser';
 
 const jsdom = require('jsdom');
@@ -45,9 +50,10 @@ export const checkForBanter = (msg: Discord.Message, channel, client) => {
             'Ødegaard',
         ];
         const randomArsenalPlayer = Math.floor(Math.random() * essentialArsenalPlayers.length);
+        const emoji = client.emojis.cache.find((emoji) => emoji.name === 'pepoFinger');
         const response = [
             '**DOMMER**',
-            'han kommentatoren er så jævlig rittard',
+            `han kommentatoren er så jævlig rittard ${emoji.toString()}`,
             '*random grove gloser etter en totalt irrelevant hendelse*',
             'ser dere ikke linær?',
             'det går så treigt',
@@ -56,8 +62,9 @@ export const checkForBanter = (msg: Discord.Message, channel, client) => {
         const luckyNumber = Math.floor(Math.random() * response.length);
         channel.send(response[luckyNumber]);
     } else if (messageIncludes('!semb')) {
+        const emoji = client.emojis.cache.find((emoji) => emoji.name === 'yepScience');
         const response = [
-            'Skal det bli noen poeng så må de score et mål her',
+            `Skal det bli noen poeng så må de score et mål her ${emoji.toString()}`,
             'Kampen er kjemisk fritt for målsjanser',
             'Pasningsfeilene i denne matchen har vært på et alt for høyt nivå',
             'Ballwatching',
@@ -99,13 +106,46 @@ export const checkForBanter = (msg: Discord.Message, channel, client) => {
         ];
         const luckyNumber = Math.floor(Math.random() * response.length);
         channel.send(response[luckyNumber]);
+    } else if (messageIncludes('!wildride')) {
+        const response = [
+            "Just looking at Ole's wild ride makes me sick",
+            "Ole's wild ride looks too intense for me",
+            "Ole's wild ride is really good value!",
+            "Ole's wild ride was great!",
+            "I'm not getting on Ole's wild ride when it is raining.",
+            "I want to go on something more thrilling than Ole's wild ride",
+            "I'm not paying that much to get on Ole's wild ride",
+            "I want to get off Ole's wild ride",
+            "I've been queuing for Ole's wild ride for ages",
+        ];
+        const luckyNumber = Math.floor(Math.random() * response.length);
+        channel.send(response[luckyNumber]);
     } else if (messageIncludes('!james')) {
+        const emoji = client.emojis.cache.find((emoji) => emoji.name === 'pepegress');
         increaseJamesCounter(() => {
             getRandom((randomEntry: RandomEntry) => {
-                if (randomEntry.jamesCounter === 0) {
-                    channel.send(`James har spist gress ${randomEntry.jamesCounter} gang`);
+                if (randomEntry.jamesCounter === 1) {
+                    channel.send(
+                        `James har spist gress ${randomEntry.jamesCounter} gang ${emoji.toString()}`
+                    );
                 } else {
-                    channel.send(`James har spist gress ${randomEntry.jamesCounter} ganger`);
+                    channel.send(
+                        `James har spist gress ${
+                            randomEntry.jamesCounter
+                        } ganger ${emoji.toString()}`
+                    );
+                }
+            });
+        });
+    } else if (messageIncludes('!lukaku')) {
+        increaseLukakuCounter(() => {
+            getRandom((randomEntry: RandomEntry) => {
+                if (randomEntry.lukakuCounter === 1) {
+                    channel.send(`Lukaku har stått med henda ut ${randomEntry.lukakuCounter} gang`);
+                } else {
+                    channel.send(
+                        `Lukaku har stått med henda ut ${randomEntry.lukakuCounter} ganger`
+                    );
                 }
             });
         });

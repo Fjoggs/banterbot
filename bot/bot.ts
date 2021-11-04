@@ -4,6 +4,8 @@ import { checkForEvents, getLiveData, getMessages, resetMessages } from '../api/
 
 import { checkForBanter } from './banter';
 import { checkForProfeten } from './profeten';
+import { getStats, insertOrUpdateUsage, Stats } from '../api/db/general';
+import { Intents } from 'discord.js';
 
 const client = new Discord.Client();
 
@@ -27,8 +29,34 @@ client.on('ready', () => {
 
 client.on('message', (msg) => {
     const messageIncludes = (phrase: string) => msg.content.toLowerCase().includes(phrase);
+    const isBot = msg.author.username === 'BanterBOT';
 
-    if (messageIncludes('!mute')) {
+    const emojiRegex = new RegExp('(:\\w*:)', 'gm');
+    const emojiMatches = msg.content.match(emojiRegex);
+    if (emojiMatches && !isBot) {
+        emojiMatches.forEach((emoji: string) => {
+            insertOrUpdateUsage(emoji, (row) => {
+                console.log(`Updated row for ${emoji}`, row);
+            });
+        });
+    } else if (messageIncludes('!stats')) {
+        getStats((emojies: Array<Stats>) => {
+            let message = 'Usage:\n';
+            emojies.forEach((emoji) => {
+                if (emoji.usage > 0) {
+                    const getEmoji = client.emojis.cache.find(
+                        (emojiCache) => emojiCache.name === emoji.name.replace(/:/g, '')
+                    );
+                    if (getEmoji) {
+                        message += `${getEmoji.toString()}  ${emoji.usage}\n`;
+                    } else {
+                        message += `${emoji.name} ${emoji.usage}\n`;
+                    }
+                }
+            });
+            channel.send(message);
+        });
+    } else if (messageIncludes('!mute')) {
         mute = true;
         channel.send('Kein liveoppdateringer');
     } else if (messageIncludes('!unmute')) {
