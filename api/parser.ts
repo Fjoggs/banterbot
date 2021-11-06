@@ -25,7 +25,7 @@ export const topDickOfTheWeek = () => {
     let currentTopDick = '';
     let currentScore = 0;
     state.fantasyTeams.forEach((team: FantasyTeam) => {
-        if (team.gameweekScore > currentScore) {
+        if (team.gameweekScore && team.gameweekScore > currentScore) {
             currentScore = team.gameweekScore;
             currentTopDick = team.name;
         }
@@ -38,7 +38,7 @@ export const luckernoobOfTheWeek = () => {
     let currentAmount = 0;
     state.fantasyTeams.forEach((team: FantasyTeam) => {
         team.currentGameweekTeam.forEach((player) => {
-            if (player.penaltySave > currentAmount) {
+            if (player.penaltySave && player.penaltySave > currentAmount) {
                 currentAmount = +player.penaltySave;
                 currentLuckernoob = team.name;
             }

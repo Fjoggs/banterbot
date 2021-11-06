@@ -11,12 +11,16 @@ import { rittardOfTheWeek, topDickOfTheWeek, luckernoobOfTheWeek } from '../api/
 const jsdom = require('jsdom');
 const { JSDOM } = jsdom;
 
-let jamesCounter = 0;
+interface PowerPriceResponse {
+    price: number;
+}
 
 export const checkForBanter = (msg: Discord.Message, channel, client) => {
     const messageIncludes = (phrase: string) => msg.content.toLowerCase().includes(phrase);
     if (messageIncludes('!rittard')) {
         channel.send(rittardOfTheWeek());
+    } else if (messageIncludes('!ban')) {
+        channel.send('Banning Molbs');
     } else if (messageIncludes('!topdick')) {
         const emoji = client.emojis.cache.find((emoji) => emoji.name === 'ez');
         channel.send(`${topDickOfTheWeek()} ${emoji.toString()}`);
@@ -181,20 +185,33 @@ export const checkForBanter = (msg: Discord.Message, channel, client) => {
         channel.send(response[luckyNumber]);
     } else if (messageIncludes('!sperregrensa')) {
         fetch('https://valgresultat.no/api/2021/st').then((response) =>
-            response.json().then((data) => {
-                const parties = data.partier;
-                const ripParties = [];
-                const happyParties = [];
-                let message = 'F i chat til ';
-                parties.forEach((party) => {
-                    if (party.stemmer.resultat.prosent >= 4) {
-                        happyParties.push(party.id.navn);
-                    } else if (party.stemmer.resultat.prosent > 2) {
-                        message += `${party.id.navn}, `;
-                    }
-                });
-                channel.send(`${message}og my annet ræl.`);
-            })
+            response.json().then(
+                (data: {
+                    partier: Array<{
+                        id: {
+                            navn: string;
+                        };
+                        stemmer: {
+                            resultat: {
+                                prosent: number;
+                            };
+                        };
+                    }>;
+                }) => {
+                    const parties = data.partier;
+                    const ripParties = [];
+                    const happyParties = [];
+                    let message = 'F i chat til ';
+                    parties.forEach((party) => {
+                        if (party.stemmer.resultat.prosent >= 4) {
+                            happyParties.push(party.id.navn);
+                        } else if (party.stemmer.resultat.prosent > 2) {
+                            message += `${party.id.navn}, `;
+                        }
+                    });
+                    channel.send(`${message}og my annet ræl.`);
+                }
+            )
         );
     } else if (messageIncludes('!foxymoxy')) {
         channel.send('Millionærene.');
@@ -206,32 +223,43 @@ export const checkForBanter = (msg: Discord.Message, channel, client) => {
         const currentDate = new Date();
         let nextRace;
         fetch('https://ergast.com/api/f1/current.json').then((response) =>
-            response.json().then((data) => {
-                const races = data.MRData.RaceTable.Races;
-                for (let index = 0; index < races.length; index++) {
-                    const race = races[index];
-                    const raceDate = new Date(`${race.date} ${race.time}`);
-                    nextRace = race;
-                    if (raceDate > currentDate) {
-                        const formattedDate = raceDate.toLocaleDateString('no-NO', {
-                            day: 'numeric',
-                            month: 'long',
-                            year: 'numeric',
-                        });
-                        const formattedTime = raceDate.toLocaleTimeString('no-NO', {
-                            hour12: false,
-                        });
-                        channel.send(
-                            `**Hva**: ${nextRace.raceName}, **Hvor**: ${nextRace.Circuit.circuitName}, **Når**: ${formattedDate}, ${formattedTime}`
-                        );
-                        break;
+            response.json().then(
+                (data: {
+                    MRData: {
+                        RaceTable: {
+                            Races: Array<{
+                                date: string;
+                                time: string;
+                            }>;
+                        };
+                    };
+                }) => {
+                    const races = data.MRData.RaceTable.Races;
+                    for (let index = 0; index < races.length; index++) {
+                        const race = races[index];
+                        const raceDate = new Date(`${race.date} ${race.time}`);
+                        nextRace = race;
+                        if (raceDate > currentDate) {
+                            const formattedDate = raceDate.toLocaleDateString('no-NO', {
+                                day: 'numeric',
+                                month: 'long',
+                                year: 'numeric',
+                            });
+                            const formattedTime = raceDate.toLocaleTimeString('no-NO', {
+                                hour12: false,
+                            });
+                            channel.send(
+                                `**Hva**: ${nextRace.raceName}, **Hvor**: ${nextRace.Circuit.circuitName}, **Når**: ${formattedDate}, ${formattedTime}`
+                            );
+                            break;
+                        }
                     }
                 }
-            })
+            )
         );
     } else if (messageIncludes('!zaposlo')) {
         fetch('https://www.ge.no/api/price/area/NO1').then((response) =>
-            response.json().then((data) => {
+            response.json().then((data: Array<PowerPriceResponse>) => {
                 let totalPrice = 0;
                 let supplierCount = 0;
                 data.forEach((supplier) => {
@@ -244,7 +272,7 @@ export const checkForBanter = (msg: Discord.Message, channel, client) => {
         );
     } else if (messageIncludes('!zapsvg')) {
         fetch('https://www.ge.no/api/price/area/NO2').then((response) =>
-            response.json().then((data) => {
+            response.json().then((data: Array<PowerPriceResponse>) => {
                 let totalPrice = 0;
                 let supplierCount = 0;
                 data.forEach((supplier) => {

@@ -62,7 +62,7 @@ export const getRandom = (callback: Function) => {
     db.close();
 };
 
-export const insertOrUpdateUsage = (name: string, callback: Function) => {
+export const insertOrUpdateUsage = (name: string) => {
     let db = new sqlite3.Database('./banterbot-database.db');
     db.serialize(() => {
         db.get(
@@ -72,7 +72,7 @@ export const insertOrUpdateUsage = (name: string, callback: Function) => {
                 if (error) {
                     console.log('Something went wrong: ', error);
                 } else {
-                    callback(row);
+                    console.log(`Updated row for ${name}`, row);
                 }
             }
         );
@@ -80,10 +80,24 @@ export const insertOrUpdateUsage = (name: string, callback: Function) => {
     db.close();
 };
 
-export const getStats = (callback: Function) => {
+export const getStatsAll = (callback: Function) => {
     let db = new sqlite3.Database('./banterbot-database.db');
     db.serialize(() => {
         db.all('SELECT * FROM emoji ORDER BY usage DESC', [], (error, row: RandomEntry) => {
+            if (error) {
+                console.log('Something went wrong: ', error);
+            } else {
+                callback(row);
+            }
+        });
+    });
+    db.close();
+};
+
+export const getStatsTop5 = (callback: Function) => {
+    let db = new sqlite3.Database('./banterbot-database.db');
+    db.serialize(() => {
+        db.all('SELECT * FROM emoji ORDER BY usage DESC LIMIT 5', [], (error, row: RandomEntry) => {
             if (error) {
                 console.log('Something went wrong: ', error);
             } else {

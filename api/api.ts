@@ -49,9 +49,43 @@ let state: GameState = {
     messages: [],
 };
 
+export interface Bootstrap {
+    elements: Array<PlayerData>;
+    events: {
+        current: number;
+    };
+}
+
+export interface LeagueDetails {
+    league_entries: Array<{
+        entry_id: number;
+        entry_name: string;
+    }>;
+}
+
+export interface GameweekStats {
+    picks: Array<Player>;
+}
+
+export interface PlayerDetails {
+    history: Array<{
+        total_points: number;
+        penalties_saved: number;
+        penalties_missed: number;
+        minutes: number;
+    }>;
+}
+
+export interface GameweekScore {
+    entry: {
+        event_points: number;
+        overall_points: number;
+    };
+}
+
 export const getAsyncData = async () => {
     const response = await fetch('https://draft.premierleague.com/api/bootstrap-static');
-    const json = await response.json();
+    const json: Bootstrap = await getBootstrapData(response);
     state.playerData = json.elements;
     state.currentGameweek = json.events.current;
     state.fantasyTeams = await getLeagueInfo();
@@ -62,10 +96,27 @@ export const getAsyncData = async () => {
     return state;
 };
 
+const getBootstrapData = async (response): Promise<Bootstrap> => await response.json();
+
+export const getLiveData = async () => {
+    let json: Array<unknown> = [];
+    try {
+        const url = `https://draft.premierleague.com/api/event/${state.currentGameweek}/live`;
+        const response = await fetch(url);
+
+        json = await getLiveDataResponse(response);
+    } catch (error) {
+        console.log('shit hit the fan ', error);
+    }
+    return json;
+};
+
+const getLiveDataResponse = async (response): Promise<Array<unknown>> => await response.json();
+
 const getLeagueInfo = async () => {
     let fantasyTeams: Array<FantasyTeam> = [];
-    const data = await fetch('https://draft.premierleague.com/api/league/55840/details');
-    const leagueDetails = await data.json();
+    const response = await fetch('https://draft.premierleague.com/api/league/55840/details');
+    const leagueDetails: LeagueDetails = await getLeagueInfoData(response);
     try {
         leagueDetails.league_entries.forEach((fantasyTeam) => {
             fantasyTeams.push({
@@ -80,22 +131,28 @@ const getLeagueInfo = async () => {
     return fantasyTeams;
 };
 
+const getLeagueInfoData = async (response): Promise<LeagueDetails> => await response.json();
+
 const getGameweekStatsForSingleFantasyTeam = async (fantasyTeam: FantasyTeam) => {
-    const data = await fetch(
+    const response = await fetch(
         `https://draft.premierleague.com/api/entry/${fantasyTeam.id}/event/${state.currentGameweek}`
     );
-    const gameweekStats = await data.json();
+    const gameweekStats: GameweekStats = await getGameweekData(response);
+
     gameweekStats.picks.forEach((player: Player) => {
         getPlayerInfo(fantasyTeam, player);
         gameweekScore(fantasyTeam);
     });
 };
 
+const getGameweekData = async (response): Promise<GameweekStats> => await response.json();
+
 const getPlayerInfo = async (fantasyTeam, player: Player) => {
     const playerResponse = await fetch(
         `https://draft.premierleague.com/api/element-summary/${player.element}`
     );
-    const playerDetails = await playerResponse.json();
+    const playerDetails: PlayerDetails = await getPlayerInfoData(playerResponse);
+
     const historyArray = playerDetails.history || [];
     const lastMatch = historyArray.pop();
     const lastScore = lastMatch.total_points;
@@ -121,24 +178,20 @@ const getPlayerInfo = async (fantasyTeam, player: Player) => {
     });
 };
 
+const getPlayerInfoData = async (response): Promise<PlayerDetails> => await response.json();
+
 const gameweekScore = async (fantasyTeam: FantasyTeam) => {
-    const data = await fetch(`https://draft.premierleague.com/api/entry/${fantasyTeam.id}/public`);
-    const json = await data.json();
+    const response = await fetch(
+        `https://draft.premierleague.com/api/entry/${fantasyTeam.id}/public`
+    );
+    const json: GameweekScore = await getGameweekScoreData(response);
+
     fantasyTeam.gameweekScore = json.entry.event_points;
+
     fantasyTeam.totalScore = json.entry.overall_points;
 };
 
-export const getLiveData = async () => {
-    let json = [];
-    try {
-        const url = `https://draft.premierleague.com/api/event/${state.currentGameweek}/live`;
-        const data = await fetch(url);
-        json = await data.json();
-    } catch (error) {
-        console.log('shit hit the fan ', error);
-    }
-    return json;
-};
+const getGameweekScoreData = async (response): Promise<GameweekScore> => await response.json();
 
 export const checkForEventsWithState = (data, incomingState) => {
     state = incomingState;
