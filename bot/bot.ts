@@ -101,7 +101,7 @@ setInterval(() => {
     console.log('polling for messages');
     const events = checkForEvents(liveData);
     const messages = getMessages(events);
-    if (isNewYear(new Date())) {
+    if (isNewYear()) {
         //@ts-ignore
         channel.send('https://www.youtube.com/watch?v=on1Arneo-jc');
     }
@@ -115,8 +115,8 @@ setInterval(() => {
     resetMessages();
 }, 60 * 1000); // Every minute
 
-const isNewYear = (date: Date) => {
-    const newYear = date.getFullYear();
+const isNewYear = () => {
+    const newYear = new Date().getFullYear();
     if (newYear !== currentYear) {
         currentYear = newYear;
         return true;

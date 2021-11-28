@@ -35,6 +35,39 @@ export const checkForBanter = (msg: Discord.Message, channel, client) => {
         const response = ['offside', 'onside', 'dive', 'gåll', 'felling'];
         const luckyNumber = Math.floor(Math.random() * response.length);
         channel.send(`Soleklar ${response[luckyNumber]}`);
+    } else if (messageIncludes('!fia')) {
+        const drivers = [
+            'Max',
+            'Hamilton',
+            'Bottas',
+            'Perez',
+            'Norris',
+            'Leclerc',
+            'Sainz',
+            'Ricciardo',
+            'Gasly',
+            'Alonso',
+            'Ocon',
+            'Vettel',
+            'Stroll',
+            'Tsunoda',
+            'Russell',
+            'Kimi',
+            'Latifi',
+            'Giovinazzi',
+            'Schumacher',
+            'Kubica',
+            'Mazepin',
+        ];
+        const randomDriver = Math.floor(Math.random() * drivers.length);
+        const response = [
+            'Let them race',
+            "Don't let them race",
+            `5 sek bot til ${drivers[randomDriver]}`,
+            'Hamilton pls',
+        ];
+        const luckyNumber = Math.floor(Math.random() * response.length);
+        channel.send(`${response[luckyNumber]}`);
     } else if (messageIncludes('!rice')) {
         const response = ['West Ham', 'Chelsea', 'United', 'City', 'Enga', 'Sleivdal'];
         const luckyNumber = Math.floor(Math.random() * response.length);
@@ -111,19 +144,22 @@ export const checkForBanter = (msg: Discord.Message, channel, client) => {
         const luckyNumber = Math.floor(Math.random() * response.length);
         channel.send(response[luckyNumber]);
     } else if (messageIncludes('!wildride')) {
+        const manager = 'Carrick';
         const response = [
-            "Just looking at Ole's wild ride makes me sick",
-            "Ole's wild ride looks too intense for me",
-            "Ole's wild ride is really good value!",
-            "Ole's wild ride was great!",
-            "I'm not getting on Ole's wild ride when it is raining.",
-            "I want to go on something more thrilling than Ole's wild ride",
-            "I'm not paying that much to get on Ole's wild ride",
-            "I want to get off Ole's wild ride",
-            "I've been queuing for Ole's wild ride for ages",
+            `Just looking at ${manager}'s wild ride makes me sick`,
+            `${manager}'s wild ride looks too intense for me`,
+            `${manager}'s wild ride is really good value!`,
+            `${manager}'s wild ride was great!`,
+            `I'm not getting on ${manager}'s wild ride when it is raining.`,
+            `I want to go on something more thrilling than ${manager}'s wild ride`,
+            `I'm not paying that much to get on ${manager}'s wild ride`,
+            `I want to get off ${manager}'s wild ride`,
+            `I've been queuing for ${manager}'s wild ride for ages`,
         ];
         const luckyNumber = Math.floor(Math.random() * response.length);
-        channel.send(response[luckyNumber]);
+        // channel.send(response[luckyNumber]);
+        const emoji = client.emojis.cache.find((emoji) => emoji.name === 'feelsbadman');
+        channel.send(`Ole's wild ride has crashed ${emoji.toString()}`);
     } else if (messageIncludes('!james')) {
         const emoji = client.emojis.cache.find((emoji) => emoji.name === 'pepegress');
         increaseJamesCounter(() => {
@@ -183,6 +219,35 @@ export const checkForBanter = (msg: Discord.Message, channel, client) => {
         ];
         const luckyNumber = Math.floor(Math.random() * response.length);
         channel.send(response[luckyNumber]);
+    } else if (messageIncludes('!faze')) {
+        const emoji = client.emojis.cache.find((emoji) => emoji.name === 'dansterling');
+        const playersIn = [
+            'olof',
+            'refrezh',
+            's1mple',
+            'niko',
+            'boombl4',
+            'Shroud',
+            'ropz',
+            'KennyS',
+            'cromen',
+            'pashaBiceps',
+            'REZ',
+            'allu',
+            'Jame',
+            'ZywOo',
+            `sterling ${emoji.toString()}`,
+        ];
+        const playersOut = ['olof', 'rain', 'karrigan', 'Twistzz', 'RobbaN', 'broky'];
+        const luckyNumberOut = Math.floor(Math.random() * playersOut.length);
+        const luckyNumberIn = Math.floor(Math.random() * playersIn.length);
+        const playerOut = playersOut[luckyNumberOut];
+        const playerIn = playersIn[luckyNumberIn];
+        if (playerIn === 'olof') {
+            channel.send(`-olof +${playerIn}`);
+        } else {
+            channel.send(`-${playerOut} +${playerIn}`);
+        }
     } else if (messageIncludes('!sperregrensa')) {
         fetch('https://valgresultat.no/api/2021/st').then((response) =>
             response.json().then(
