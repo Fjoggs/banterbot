@@ -15,6 +15,9 @@ interface PowerPriceResponse {
     price: number;
 }
 
+let hypeCounter = 0;
+let previousDate = new Date();
+
 export const checkForBanter = (msg: Discord.Message, channel, client) => {
     const messageIncludes = (phrase: string) => msg.content.toLowerCase().includes(phrase);
     if (messageIncludes('!rittard')) {
@@ -35,6 +38,10 @@ export const checkForBanter = (msg: Discord.Message, channel, client) => {
         const response = ['offside', 'onside', 'dive', 'gåll', 'felling'];
         const luckyNumber = Math.floor(Math.random() * response.length);
         channel.send(`Soleklar ${response[luckyNumber]}`);
+    } else if (messageIncludes('!toto')) {
+        channel.send(
+            'https://cdn.discordapp.com/attachments/110121552934100992/917145089862676520/totorage.gif'
+        );
     } else if (messageIncludes('!fia')) {
         const drivers = [
             'Max',
@@ -99,7 +106,7 @@ export const checkForBanter = (msg: Discord.Message, channel, client) => {
         const luckyNumber = Math.floor(Math.random() * response.length);
         channel.send(response[luckyNumber]);
     } else if (messageIncludes('!semb')) {
-        const emoji = client.emojis.cache.find((emoji) => emoji.name === 'yepScience');
+        const emoji = client.emojis.cache.find((emoji) => emoji.name === 'yepscience');
         const response = [
             `Skal det bli noen poeng så må de score et mål her ${emoji.toString()}`,
             'Kampen er kjemisk fritt for målsjanser',
@@ -144,7 +151,7 @@ export const checkForBanter = (msg: Discord.Message, channel, client) => {
         const luckyNumber = Math.floor(Math.random() * response.length);
         channel.send(response[luckyNumber]);
     } else if (messageIncludes('!wildride')) {
-        const manager = 'Carrick';
+        const manager = 'Ralf';
         const response = [
             `Just looking at ${manager}'s wild ride makes me sick`,
             `${manager}'s wild ride looks too intense for me`,
@@ -157,9 +164,9 @@ export const checkForBanter = (msg: Discord.Message, channel, client) => {
             `I've been queuing for ${manager}'s wild ride for ages`,
         ];
         const luckyNumber = Math.floor(Math.random() * response.length);
-        // channel.send(response[luckyNumber]);
-        const emoji = client.emojis.cache.find((emoji) => emoji.name === 'feelsbadman');
-        channel.send(`Ole's wild ride has crashed ${emoji.toString()}`);
+        channel.send(response[luckyNumber]);
+        // const emoji = client.emojis.cache.find((emoji) => emoji.name === 'feelsbadman');
+        // channel.send(`Ole's wild ride has crashed ${emoji.toString()}`);
     } else if (messageIncludes('!james')) {
         const emoji = client.emojis.cache.find((emoji) => emoji.name === 'pepegress');
         increaseJamesCounter(() => {
@@ -348,6 +355,79 @@ export const checkForBanter = (msg: Discord.Message, channel, client) => {
                 channel.send(`Snittpris strøm Stavanger: ${avgPrice}`);
             })
         );
+    } else if (messageIncludes('!lantime')) {
+        const currentDate = new Date();
+        const lanDate = new Date('2022-07-22');
+
+        const daysUntilLan = Math.ceil(
+            (lanDate.getTime() - currentDate.getTime()) / 1000 / 60 / 60 / 24
+        );
+        let emoji;
+        if (daysUntilLan < 1) {
+            emoji = client.emojis.cache.find((emoji) => emoji.name === 'realshit');
+        } else if (daysUntilLan < 30) {
+            emoji = client.emojis.cache.find((emoji) => emoji.name === 'poggers');
+        } else if (daysUntilLan < 60) {
+            emoji = client.emojis.cache.find((emoji) => emoji.name === 'pagchomp');
+        } else if (daysUntilLan < 60) {
+            emoji = client.emojis.cache.find((emoji) => emoji.name === 'feelsgoodman');
+        } else if (daysUntilLan < 90) {
+            emoji = client.emojis.cache.find((emoji) => emoji.name === 'feelsbadman');
+        } else if (daysUntilLan < 120) {
+            emoji = client.emojis.cache.find((emoji) => emoji.name === 'sadge');
+        } else if (daysUntilLan > 120) {
+            emoji = client.emojis.cache.find((emoji) => emoji.name === 'pepehands');
+        }
+        if (
+            previousDate &&
+            currentDate.getSeconds() - previousDate.getSeconds() < 10 &&
+            currentDate.getMinutes() === previousDate.getMinutes()
+        ) {
+            if (hypeCounter === 0) {
+                channel.send(`${daysUntilLan} dager til lan ${emoji.toString()}`);
+                hypeCounter++;
+            } else if (hypeCounter === 1) {
+                channel.send(`${daysUntilLan * 24} timer til lan ${emoji.toString()}`);
+                hypeCounter++;
+            } else if (hypeCounter === 2) {
+                channel.send(`${daysUntilLan * 24 * 60} minutter til lan ${emoji.toString()}`);
+                hypeCounter++;
+            } else if (hypeCounter === 3) {
+                channel.send(`${daysUntilLan * 24 * 60 * 60} sekunder til lan ${emoji.toString()}`);
+                hypeCounter++;
+            } else if (hypeCounter === 4) {
+                channel.send(
+                    `${
+                        daysUntilLan * 24 * 60 * 60 * 1000
+                    } millisekunder til lan ${emoji.toString()}`
+                );
+                hypeCounter++;
+            } else if (hypeCounter === 5) {
+                channel.send(
+                    `${Math.ceil(daysUntilLan / 7)} sommerlan til lan ${emoji.toString()}`
+                );
+                hypeCounter++;
+            } else if (hypeCounter === 6) {
+                channel.send(
+                    `${Math.ceil(daysUntilLan / 10)} sommerlan+prelan til lan ${emoji.toString()}`
+                );
+                hypeCounter++;
+            } else if (hypeCounter === 7) {
+                channel.send(
+                    `${Math.ceil(
+                        daysUntilLan / 13
+                    )} sommerlan+prelan+preprelan til lan ${emoji.toString()}`
+                );
+                hypeCounter++;
+            } else if (hypeCounter === 8) {
+                channel.send(`RO NED HYPEN`);
+                hypeCounter = 0;
+            }
+        } else {
+            channel.send(`${daysUntilLan} dager til lan ${emoji.toString()}`);
+        }
+        previousDate = currentDate;
+        console.log('previousDate', previousDate.toLocaleDateString());
     }
 };
 

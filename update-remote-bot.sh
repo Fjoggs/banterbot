@@ -18,6 +18,5 @@
 #===============================================================================
 
 set -o nounset                              # Treat unset variables as an error
-i
 rsync -av ~/projects/banterbot/ fjoggs@anno1337.com:~/banterbot
 

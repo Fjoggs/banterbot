@@ -3,15 +3,18 @@ import { fetchData } from '../api/parser';
 import { checkForEvents, getLiveData, getMessages, resetMessages } from '../api/api';
 
 import { checkForBanter } from './banter';
-import { checkForProfeten } from './profeten';
 import { getStatsAll, getStatsTop5, insertOrUpdateUsage, Stats } from '../api/db/general';
 import { Intents } from 'discord.js';
+import { env } from '../app-env';
+import { checkForProfeten } from './profeten';
+import { checkForUtil } from './util';
 
 const client = new Discord.Client({
     intents: [
         Intents.FLAGS.GUILDS,
         Intents.FLAGS.GUILD_MESSAGES,
         Intents.FLAGS.GUILD_MESSAGE_REACTIONS,
+        Intents.FLAGS.GUILD_EMOJIS_AND_STICKERS,
     ],
 });
 
@@ -25,7 +28,7 @@ fetchLiveData();
 let channel: Discord.Channel | undefined;
 let testChannel: Discord.Channel | undefined;
 let mute = true;
-let currentYear = 2021;
+let currentYear = 2022;
 
 const preikGuildId = '110121552934100992';
 const fjoggsGeneralGuildId = '774731038391140375';
@@ -36,7 +39,7 @@ client.once('ready', () => {
     testChannel = client.channels.cache.get(fjoggsGeneralGuildId); // fjoggs' general
 });
 
-client.login(process.env.TOKEN);
+client.login(env.TOKEN);
 
 client.on('interactionCreate', async (interaction) => {
     if (!interaction.isCommand()) return;
@@ -94,7 +97,8 @@ client.on('messageCreate', async (message) => {
         channel.send(`Spam back on the menu ${emoji.toString()}`);
     }
     checkForBanter(message, channel, client);
-    // checkForProfeten(message, channel);
+    checkForProfeten(message, channel);
+    checkForUtil(message, testChannel);
 });
 
 setInterval(() => {

@@ -1,5 +1,4 @@
 import * as Discord from 'discord.js';
-import { setOriginalNode } from 'typescript';
 import {
     getWinnersInLeague,
     getBets,
@@ -19,7 +18,6 @@ import {
     updateChallenge,
 } from '../api/db/challenges';
 import {
-    getLeagueIdForChallenge,
     changeLeagueRep,
     getLeague,
     League,
