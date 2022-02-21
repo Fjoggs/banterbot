@@ -293,8 +293,9 @@ export const checkForBanter = (msg: Discord.Message, channel, client) => {
         channel.send(`${yearSince} år sia morna jens`);
     } else if (messageIncludes('!racetime')) {
         const currentDate = new Date();
+        const currentYear = currentDate.getFullYear();
         let nextRace;
-        fetch('https://ergast.com/api/f1/current.json').then((response) =>
+        fetch(`https://ergast.com/api/f1/${currentYear}.json`).then((response) =>
             response.json().then(
                 (data: {
                     MRData: {
