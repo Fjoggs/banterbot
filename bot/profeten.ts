@@ -63,7 +63,7 @@ const playersIdsToName = {
     13: 'Juell',
 };
 
-export const checkForProfeten = (msg: Discord.Message, channel) => {
+export const checkForProfeten = (msg: Discord.Message, channel, debugChannel) => {
     const messageIsEqual = (phrase: string) => msg.content.toLowerCase() === phrase;
     const messageStartsWith = (phrase: string) => msg.content.toLowerCase().startsWith(phrase);
 

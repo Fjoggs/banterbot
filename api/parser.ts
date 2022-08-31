@@ -1,7 +1,8 @@
-import { getAsyncData, FantasyTeam, GameState } from './api';
+import { FantasyTeam, GameState } from '../types/Fantasy';
+import { getAsyncData } from './api';
 
 let state: GameState;
-export const fetchData = async () => (state = await getAsyncData());
+export const fetchData = async (debugChannel) => (state = await getAsyncData(debugChannel));
 
 export const rittardOfTheWeek = () => {
     let currentRittard = '';

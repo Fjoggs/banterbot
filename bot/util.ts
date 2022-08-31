@@ -14,7 +14,7 @@ export interface Emoji {
     available: boolean;
 }
 
-export const checkForUtil = (msg: Discord.Message, channel) => {
+export const checkForUtil = (msg: Discord.Message, channel, debugChannel) => {
     const messageIncludes = (phrase: string) => msg.content.toLowerCase().includes(phrase);
     if (messageIncludes('!xmas')) {
         fetch(DISCORD_API_URL + '/guilds/774731038391140372/emojis', {
@@ -60,5 +60,13 @@ export const checkForUtil = (msg: Discord.Message, channel) => {
             .catch((error) => {
                 console.log('first level error', error);
             });
+    }
+};
+
+export const runAndReport = (func: Function, debugChannel, command: string) => {
+    try {
+        func();
+    } catch (error) {
+        debugChannel.send(`Command ${command} failed with error: ${error}`);
     }
 };

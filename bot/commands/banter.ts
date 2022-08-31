@@ -1,149 +1,188 @@
-import * as Discord from 'discord.js';
-import fetch from 'node-fetch';
-import {
-    getRandom,
-    increaseJamesCounter,
-    increaseLukakuCounter,
-    RandomEntry,
-} from '../api/db/general';
-import { rittardOfTheWeek, topDickOfTheWeek, luckernoobOfTheWeek } from '../api/parser';
-import { runAndReport } from './util';
+import { Channel } from 'discord.js';
+import { rittardOfTheWeek, topDickOfTheWeek, luckernoobOfTheWeek } from '../../api/parser';
 
-const jsdom = require('jsdom');
-const { JSDOM } = jsdom;
-
-interface PowerPriceResponse {
-    price: number;
+interface Command {
+    name: string;
+    action: Function | string;
+    emojiName?: string;
 }
 
-let hypeCounter = 0;
-let previousDate = new Date();
+export const banterCommands: Command[] = [
+    {
+        name: 'rittard',
+        action: rittardOfTheWeek,
+    },
+    {
+        name: 'ban',
+        action: 'Banning Molbs',
+    },
+    {
+        name: 'topdick',
+        action: topDickOfTheWeek,
+        emojiName: 'ez',
+    },
+    {
+        name: 'luckernoob',
+        action: luckernoobOfTheWeek,
+    },
+    {
+        name: 'pope',
+        action: 'Fuck Pope',
+    },
+    {
+        name: 'baitley',
+        action: '',
+        emojiName: 'kekw',
+    },
+    {
+        name: 'var',
+        action: () => {
+            const response = ['offside', 'onside', 'dive', 'gåll', 'felling'];
+            const luckyNumber = Math.floor(Math.random() * response.length);
+            return `Soleklar ${response[luckyNumber]}`;
+        },
+    },
+    {
+        name: 'toto',
+        action: 'https://cdn.discordapp.com/attachments/110121552934100992/917145089862676520/totorage.gif',
+    },
+    {
+        name: 'fia',
+        action: () => {
+            const drivers = [
+                'Max',
+                'Hamilton',
+                'Bottas',
+                'Perez',
+                'Norris',
+                'Leclerc',
+                'Sainz',
+                'Ricciardo',
+                'Gasly',
+                'Alonso',
+                'Ocon',
+                'Vettel',
+                'Stroll',
+                'Tsunoda',
+                'Russell',
+                'Albon',
+                'Latifi',
+                'Zhou',
+                'Schumacher',
+                'Magnussen',
+            ];
+            const randomDriver = Math.floor(Math.random() * drivers.length);
+            const response = [
+                'Let them race',
+                "Don't let them race",
+                `5 sek bot til ${drivers[randomDriver]}`,
+                'Hamilton pls',
+            ];
+            const luckyNumber = Math.floor(Math.random() * response.length);
+            return `${response[luckyNumber]}`;
+        },
+    },
+    {
+        name: 'rice',
+        action: () => {
+            const response = ['West Ham', 'Chelsea', 'United', 'City', 'Enga', 'Sleivdal'];
+            const luckyNumber = Math.floor(Math.random() * response.length);
+            return `Rice til ${response[luckyNumber]}`;
+        },
+    },
+    {
+        name: 'nuppe',
+        action: () => {
+            const response = [`DREP 'N. DREP MÆLBS!`];
+            const luckyNumber = Math.floor(Math.random() * response.length);
+            return response[luckyNumber];
+        },
+    },
+    {
+        name: 'molbs',
+        action: () => {
+            const essentialArsenalPlayers = [
+                'Jesus',
+                'Tierney',
+                'Zinchenko',
+                'Saka',
+                'Xhaka',
+                'Martinelli',
+                'White',
+                'Ødegaard',
+            ];
+            const randomArsenalPlayer = Math.floor(Math.random() * essentialArsenalPlayers.length);
+            const response = [
+                '**DOMMER**',
+                `han kommentatoren er så jævlig rittard`,
+                '*random grove gloser etter en totalt irrelevant hendelse*',
+                'ser dere ikke linær?',
+                'det går så treigt',
+                `er ${essentialArsenalPlayers[randomArsenalPlayer]} essential?`,
+                `Orker ikke`,
+            ];
+            const luckyNumber = Math.floor(Math.random() * response.length);
+            return response[luckyNumber];
+        },
+    },
+    {
+        name: 'semb',
+        action: () => {
+            const response = [
+                'Skal det bli noen poeng så må de score et mål her',
+                'Kampen er kjemisk fritt for målsjanser',
+                'Pasningsfeilene i denne matchen har vært på et alt for høyt nivå',
+                'Ballwatching',
+                'Det er et bra løp, men han er i offside',
+                'Ryan Sterling',
+                'De lukter høler',
+            ];
+            const luckyNumber = Math.floor(Math.random() * response.length);
+            return response[luckyNumber];
+        },
+    },
+    {
+        name: 'jose',
+        action: () => {
+            const response = [
+                'https://i.redd.it/ktbd2jkzxh761.gif',
+                'https://i.imgur.com/Ci4WQ0Q.gif',
+                'https://zippy.gfycat.com/BruisedFlawlessAngwantibo.webm',
+                'https://zippy.gfycat.com/MasculineAgedBlowfish.webm',
+                'https://i.imgur.com/Lb9KSKa.mp4',
+            ];
+            const luckyNumber = Math.floor(Math.random() * response.length);
+            return response[luckyNumber];
+        },
+    },
+    {
+        name: 'pog',
+        action: () => {
+            const response = [
+                'https://gfycat.com/wigglyneatgrackle',
+                'https://cdn.discordapp.com/attachments/110121552934100992/863911058699714560/pogmobile.gif',
+            ];
+            const luckyNumber = Math.floor(Math.random() * response.length);
+            return response[luckyNumber];
+        },
+    },
+];
 
 export const checkForBanter = (msg: Discord.Message, channel, client, debugChannel) => {
     const messageIncludes = (phrase: string) => msg.content.toLowerCase().includes(phrase);
-    if (messageIncludes('!rittard')) {
-        runAndReport(() => channel.send(rittardOfTheWeek()), debugChannel, '!rittard');
-    } else if (messageIncludes('!ban')) {
-        runAndReport(() => channel.send('Banning Molbs'), debugChannel, '!ban');
-    } else if (messageIncludes('!topdick')) {
-        runAndReport(
-            () => {
-                const emoji = client.emojis.cache.find((emoji) => emoji.name === 'ez');
-                channel.send(`${topDickOfTheWeek()} ${emoji.toString()}`);
-            },
-            debugChannel,
-            '!ban'
-        );
+    if (messageIncludes('lol')) {
     } else if (messageIncludes('!luckernoob')) {
-        channel.send(luckernoobOfTheWeek());
     } else if (messageIncludes('!pope')) {
-        channel.send('Fuck Pope');
     } else if (messageIncludes('!baitley')) {
-        const emoji = client.emojis.cache.find((emoji) => emoji.name === 'kekw');
-        channel.send(emoji.toString());
     } else if (messageIncludes('!var')) {
-        const response = ['offside', 'onside', 'dive', 'gåll', 'felling'];
-        const luckyNumber = Math.floor(Math.random() * response.length);
-        channel.send(`Soleklar ${response[luckyNumber]}`);
     } else if (messageIncludes('!toto')) {
-        channel.send(
-            'https://cdn.discordapp.com/attachments/110121552934100992/917145089862676520/totorage.gif'
-        );
     } else if (messageIncludes('!fia')) {
-        const drivers = [
-            'Max',
-            'Hamilton',
-            'Bottas',
-            'Perez',
-            'Norris',
-            'Leclerc',
-            'Sainz',
-            'Ricciardo',
-            'Gasly',
-            'Alonso',
-            'Ocon',
-            'Vettel',
-            'Stroll',
-            'Tsunoda',
-            'Russell',
-            'Kimi',
-            'Latifi',
-            'Giovinazzi',
-            'Schumacher',
-            'Kubica',
-            'Mazepin',
-        ];
-        const randomDriver = Math.floor(Math.random() * drivers.length);
-        const response = [
-            'Let them race',
-            "Don't let them race",
-            `5 sek bot til ${drivers[randomDriver]}`,
-            'Hamilton pls',
-        ];
-        const luckyNumber = Math.floor(Math.random() * response.length);
-        channel.send(`${response[luckyNumber]}`);
     } else if (messageIncludes('!rice')) {
-        const response = ['West Ham', 'Chelsea', 'United', 'City', 'Enga', 'Sleivdal'];
-        const luckyNumber = Math.floor(Math.random() * response.length);
-        channel.send(`Rice til ${response[luckyNumber]}`);
     } else if (messageIncludes('!nuppe')) {
-        const response = [`DREP 'N. DREP MÆLBS!`];
-        const luckyNumber = Math.floor(Math.random() * response.length);
-        channel.send(response[luckyNumber]);
     } else if (messageIncludes('!molbs')) {
-        const essentialArsenalPlayers = [
-            'Jesus',
-            'Tierney',
-            'Zinchenko',
-            'Saka',
-            'Xhaka',
-            'Martinelli',
-            'White',
-            'Ødegaard',
-        ];
-        const randomArsenalPlayer = Math.floor(Math.random() * essentialArsenalPlayers.length);
-        const emoji = client.emojis.cache.find((emoji) => emoji.name === 'pepoFinger');
-        const response = [
-            '**DOMMER**',
-            `han kommentatoren er så jævlig rittard ${emoji.toString()}`,
-            '*random grove gloser etter en totalt irrelevant hendelse*',
-            'ser dere ikke linær?',
-            'det går så treigt',
-            `er ${essentialArsenalPlayers[randomArsenalPlayer]} essential?`,
-            `Orker ikke`,
-        ];
-        const luckyNumber = Math.floor(Math.random() * response.length);
-        channel.send(response[luckyNumber]);
     } else if (messageIncludes('!semb')) {
-        const emoji = client.emojis.cache.find((emoji) => emoji.name === 'yepscience');
-        const response = [
-            `Skal det bli noen poeng så må de score et mål her ${emoji.toString()}`,
-            'Kampen er kjemisk fritt for målsjanser',
-            'Pasningsfeilene i denne matchen har vært på et alt for høyt nivå',
-            'Ballwatching',
-            'Det er et bra løp, men han er i offside',
-            'Ryan Sterling',
-            'De lukter høler',
-        ];
-        const luckyNumber = Math.floor(Math.random() * response.length);
-        channel.send(response[luckyNumber]);
     } else if (messageIncludes('!jose')) {
-        const response = [
-            'https://i.redd.it/ktbd2jkzxh761.gif',
-            'https://i.imgur.com/Ci4WQ0Q.gif',
-            'https://zippy.gfycat.com/BruisedFlawlessAngwantibo.webm',
-            'https://zippy.gfycat.com/MasculineAgedBlowfish.webm',
-            'https://i.imgur.com/Lb9KSKa.mp4',
-        ];
-        const luckyNumber = Math.floor(Math.random() * response.length);
-        channel.send(response[luckyNumber]);
     } else if (messageIncludes('!pog')) {
-        const response = [
-            'https://gfycat.com/wigglyneatgrackle',
-            'https://cdn.discordapp.com/attachments/110121552934100992/863911058699714560/pogmobile.gif',
-        ];
-        const luckyNumber = Math.floor(Math.random() * response.length);
-        channel.send(response[luckyNumber]);
     } else if (messageIncludes('!ramos')) {
         const response = [
             'https://i.pinimg.com/originals/e9/f7/25/e9f72559d7ffa79df54f0273977221aa.gif',

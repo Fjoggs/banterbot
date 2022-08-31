@@ -14,8 +14,8 @@ let state: GameState;
 
 let liveData = {};
 const getData = async () => {
-    state = await getAsyncData();
-    liveData = await getLiveData();
+    state = await getAsyncData({});
+    liveData = await getLiveData({});
 };
 getData();
 

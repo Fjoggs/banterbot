@@ -1,13 +1,20 @@
 import * as Discord from 'discord.js';
 import { fetchData } from '../api/parser';
-import { checkForEvents, getLiveData, getMessages, resetMessages } from '../api/api';
+import {
+    checkForEvents,
+    getCurrentGameweek,
+    getLiveData,
+    getMessages,
+    resetMessages,
+    updateGameweek,
+} from '../api/api';
 
 import { checkForBanter } from './banter';
 import { getStatsAll, getStatsTop5, insertOrUpdateUsage, Stats } from '../api/db/general';
 import { Intents } from 'discord.js';
 import { env } from '../app-env';
 import { checkForProfeten } from './profeten';
-import { checkForUtil } from './util';
+import { checkForUtil, runAndReport } from './util';
 
 const client = new Discord.Client({
     intents: [
@@ -18,25 +25,35 @@ const client = new Discord.Client({
     ],
 });
 
-let liveData = {};
-const fetchLiveData = async () => {
-    await fetchData();
-    liveData = await getLiveData();
-};
-fetchLiveData();
-
 let channel: Discord.Channel | undefined;
 let testChannel: Discord.Channel | undefined;
+let debugChannel: Discord.Channel | undefined;
 let mute = true;
 let currentYear = 2022;
 
 const preikGuildId = '110121552934100992';
 const fjoggsGeneralGuildId = '774731038391140375';
+const debugGuildId = '1004475950349693039';
+let liveData = {};
 
 client.once('ready', () => {
     console.log(`Logged in as ${client?.user?.tag}!`);
     channel = client.channels.cache.get(preikGuildId); //preik
     testChannel = client.channels.cache.get(fjoggsGeneralGuildId); // fjoggs' general
+    debugChannel = client.channels.cache.get(debugGuildId); // botjævlan
+
+    runAndReport(
+        async () => {
+            console.log('inside 1');
+            await fetchData(debugChannel);
+            console.log('inside 2');
+            liveData = await getLiveData(debugChannel);
+            console.log('liveData', liveData);
+        },
+        debugChannel,
+        'Fetch draft data on startup'
+    );
+    console.log('liveData', liveData);
 });
 
 client.login(env.TOKEN);
@@ -95,14 +112,19 @@ client.on('messageCreate', async (message) => {
         mute = false;
         //@ts-ignore
         channel.send(`Spam back on the menu ${emoji.toString()}`);
+    } else if (messageIncludes('!current')) {
+        console.log('current', getCurrentGameweek());
+        //@ts-ignore
+        debugChannel.send(`FPL-gw: ${getCurrentGameweek()}`);
     }
-    checkForBanter(message, channel, client);
-    checkForProfeten(message, channel);
-    checkForUtil(message, testChannel);
+    checkForBanter(message, channel, client, debugChannel);
+    checkForProfeten(message, channel, debugChannel);
+    checkForUtil(message, testChannel, debugChannel);
 });
 
 setInterval(() => {
     console.log('polling for messages');
+    updateGameweek();
     const events = checkForEvents(liveData);
     const messages = getMessages(events);
     if (isNewYear()) {

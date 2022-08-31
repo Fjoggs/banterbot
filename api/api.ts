@@ -1,45 +1,14 @@
 import fetch from 'node-fetch';
-import { updateChallenge } from './db/challenges';
-
-export type Player = {
-    element: number; // id
-    position: number;
-    name: string;
-    currentScore: number;
-    events: Event[];
-    totalScore?: number;
-    penaltySave?: number;
-    penaltyMiss?: number;
-    minutesPlayed?: number;
-    messagesSent: number;
-};
-
-type Event = {
-    points: number;
-    value: number;
-    stat: string;
-};
-
-export type FantasyTeam = {
-    id: number;
-    name: string;
-    currentGameweekTeam: Array<Player>;
-    gameweekScore?: number;
-    totalScore?: number;
-};
-
-export type GameState = {
-    playerData: Array<PlayerData>;
-    currentGameweek: number;
-    fantasyTeams: Array<FantasyTeam>;
-    activePlayers: Set<Player>;
-    messages: string[];
-};
-
-export type PlayerData = {
-    id: number;
-    second_name: string;
-};
+import {
+    GameState,
+    Bootstrap,
+    FantasyTeam,
+    LeagueDetails,
+    GameweekStats,
+    PlayerDetails,
+    GameweekScore,
+    Player,
+} from '../types/Fantasy';
 
 let state: GameState = {
     playerData: [],
@@ -49,75 +18,51 @@ let state: GameState = {
     messages: [],
 };
 
-export interface Bootstrap {
-    elements: Array<PlayerData>;
-    events: {
-        current: number;
-    };
-}
+const apiUrl = 'https://draft.premierleague.com/api';
 
-export interface LeagueDetails {
-    league_entries: Array<{
-        entry_id: number;
-        entry_name: string;
-    }>;
-}
-
-export interface GameweekStats {
-    picks: Array<Player>;
-}
-
-export interface PlayerDetails {
-    history: Array<{
-        total_points: number;
-        penalties_saved: number;
-        penalties_missed: number;
-        minutes: number;
-    }>;
-}
-
-export interface GameweekScore {
-    entry: {
-        event_points: number;
-        overall_points: number;
-    };
-}
-
-export const getAsyncData = async () => {
-    const response = await fetch('https://draft.premierleague.com/api/bootstrap-static');
+export const updateGameweek = async () => {
+    const response = await fetch(`${apiUrl}/bootstrap-static`);
     const json: Bootstrap = await getBootstrapData(response);
-    state.playerData = json.elements;
     state.currentGameweek = json.events.current;
-    state.fantasyTeams = await getLeagueInfo();
-    state.fantasyTeams.forEach((fantasyTeam) => {
-        console.log('fantasyTeam', fantasyTeam);
-        getGameweekStatsForSingleFantasyTeam(fantasyTeam);
-    });
-    return state;
+};
+
+export const getCurrentGameweek = () => state.currentGameweek;
+
+export const getAsyncData = async (debugChannel): Promise<GameState> => {
+    try {
+        const response = await fetch(`${apiUrl}/bootstrap-static`);
+        const json: Bootstrap = await getBootstrapData(response);
+        state.playerData = json.elements;
+        state.currentGameweek = json.events.current || 1;
+        state.fantasyTeams = await getLeagueInfo(debugChannel);
+        state.fantasyTeams.forEach((fantasyTeam) => {
+            getGWStatsForTeam(fantasyTeam, debugChannel);
+        });
+        return state;
+    } catch (error) {
+        debugChannel.send(`getAsyncData failed with error: ${error}`);
+        return state;
+    }
 };
 
 const getBootstrapData = async (response): Promise<Bootstrap> => await response.json();
 
-export const getLiveData = async () => {
+export const getLiveData = async (debugChannel) => {
     let json: Array<unknown> = [];
     try {
-        const url = `https://draft.premierleague.com/api/event/${state.currentGameweek}/live`;
-        const response = await fetch(url);
-
-        json = await getLiveDataResponse(response);
+        const response = await fetch(`${apiUrl}/event/${state.currentGameweek}/live`);
+        json = await response.json();
     } catch (error) {
-        console.log('shit hit the fan ', error);
+        debugChannel.send(`getLiveData failed with error: ${error}`);
     }
     return json;
 };
 
-const getLiveDataResponse = async (response): Promise<Array<unknown>> => await response.json();
-
-const getLeagueInfo = async () => {
+const getLeagueInfo = async (debugChannel) => {
     let fantasyTeams: Array<FantasyTeam> = [];
-    const response = await fetch('https://draft.premierleague.com/api/league/55840/details');
-    const leagueDetails: LeagueDetails = await getLeagueInfoData(response);
     try {
+        const response = await fetch(`${apiUrl}/league/81059/details`);
+        const leagueDetails: LeagueDetails = await response.json();
         leagueDetails.league_entries.forEach((fantasyTeam) => {
             fantasyTeams.push({
                 id: fantasyTeam.entry_id,
@@ -126,72 +71,74 @@ const getLeagueInfo = async () => {
             });
         });
     } catch (error) {
-        console.log('shit went wrong!', error);
+        debugChannel.send(`getLeagueInfo failed with error: ${error}`);
     }
     return fantasyTeams;
 };
 
-const getLeagueInfoData = async (response): Promise<LeagueDetails> => await response.json();
+const getGWStatsForTeam = async (fantasyTeam: FantasyTeam, debugChannel) => {
+    try {
+        const response = await fetch(
+            `${apiUrl}/entry/${fantasyTeam.id}/event/${state.currentGameweek}`
+        );
+        const gameweekStats: GameweekStats = await response.json();
 
-const getGameweekStatsForSingleFantasyTeam = async (fantasyTeam: FantasyTeam) => {
-    const response = await fetch(
-        `https://draft.premierleague.com/api/entry/${fantasyTeam.id}/event/${state.currentGameweek}`
-    );
-    const gameweekStats: GameweekStats = await getGameweekData(response);
-
-    gameweekStats.picks.forEach((player: Player) => {
-        getPlayerInfo(fantasyTeam, player);
-        gameweekScore(fantasyTeam);
-    });
+        gameweekStats.picks.forEach((player: Player) => {
+            getPlayerInfo(fantasyTeam, player, debugChannel);
+            gameweekScore(fantasyTeam, debugChannel);
+        });
+    } catch (error) {
+        debugChannel.send(`getLeagueInfo failed with error: ${error}`);
+    }
 };
 
-const getGameweekData = async (response): Promise<GameweekStats> => await response.json();
+const getPlayerInfo = async (fantasyTeam, player: Player, debugChannel) => {
+    try {
+        const playerResponse = await fetch(`${apiUrl}/element-summary/${player.element}`);
+        const playerDetails: PlayerDetails = await getPlayerInfoData(playerResponse);
 
-const getPlayerInfo = async (fantasyTeam, player: Player) => {
-    const playerResponse = await fetch(
-        `https://draft.premierleague.com/api/element-summary/${player.element}`
-    );
-    const playerDetails: PlayerDetails = await getPlayerInfoData(playerResponse);
-
-    const historyArray = playerDetails.history || [];
-    const lastMatch = historyArray.pop();
-    const lastScore = lastMatch.total_points;
-    let counter = 0;
-    state.playerData.some((data) => {
-        if (data.id === player.element) {
-            const currentPlayer: Player = {
-                element: player.element,
-                position: player.position,
-                name: data.second_name,
-                currentScore: lastScore,
-                events: [],
-                penaltySave: lastMatch.penalties_saved,
-                penaltyMiss: lastMatch.penalties_missed,
-                minutesPlayed: lastMatch.minutes,
-                messagesSent: 0,
-            };
-            state.activePlayers.add(currentPlayer);
-            counter = counter + 1;
-            fantasyTeam.currentGameweekTeam.push(currentPlayer);
-            return true;
-        }
-    });
+        const historyArray = playerDetails.history || [];
+        const lastMatch = historyArray.pop();
+        const lastScore = lastMatch.total_points;
+        let counter = 0;
+        state.playerData.some((data) => {
+            if (data.id === player.element) {
+                const currentPlayer: Player = {
+                    element: player.element,
+                    position: player.position,
+                    name: data.second_name,
+                    currentScore: lastScore,
+                    events: [],
+                    penaltySave: lastMatch.penalties_saved,
+                    penaltyMiss: lastMatch.penalties_missed,
+                    minutesPlayed: lastMatch.minutes,
+                    messagesSent: 0,
+                };
+                state.activePlayers.add(currentPlayer);
+                counter = counter + 1;
+                fantasyTeam.currentGameweekTeam.push(currentPlayer);
+                return true;
+            }
+        });
+    } catch (error) {
+        debugChannel.send(`getPlayerInfo failed with error: ${error}`);
+    }
 };
 
 const getPlayerInfoData = async (response): Promise<PlayerDetails> => await response.json();
 
-const gameweekScore = async (fantasyTeam: FantasyTeam) => {
-    const response = await fetch(
-        `https://draft.premierleague.com/api/entry/${fantasyTeam.id}/public`
-    );
-    const json: GameweekScore = await getGameweekScoreData(response);
+const gameweekScore = async (fantasyTeam: FantasyTeam, debugChannel) => {
+    try {
+        const response = await fetch(`${apiUrl}/entry/${fantasyTeam.id}/public`);
+        const json: GameweekScore = await response.json();
 
-    fantasyTeam.gameweekScore = json.entry.event_points;
+        fantasyTeam.gameweekScore = json.entry.event_points;
 
-    fantasyTeam.totalScore = json.entry.overall_points;
+        fantasyTeam.totalScore = json.entry.overall_points;
+    } catch (error) {
+        debugChannel.send(`gameweekScore failed with error: ${error}`);
+    }
 };
-
-const getGameweekScoreData = async (response): Promise<GameweekScore> => await response.json();
 
 export const checkForEventsWithState = (data, incomingState) => {
     state = incomingState;
@@ -250,51 +197,3 @@ export const getMessages = (events): Array<String> => {
 };
 
 export const resetMessages = () => (state.messages = []);
-
-export const updateGameweekState = (element: number) => {};
-
-export const checkForEvents2 = (data): Array<string> => {
-    const elements = data.elements;
-    let events = [];
-    // if (state.activePlayers) {
-    //   state.activePlayers.forEach((player) => {
-    //     if (elements) {
-    //       if (elements[player.element]) {
-    //         let eventList = [];
-    //         if (
-    //           elements[player.element].explain[0] &&
-    //           elements[player.element].explain[0][0]
-    //         ) {
-    //           eventList = elements[player.element].explain[0][0];
-    //         }
-    //         if (eventList.length > 1) {
-    //           if (eventList.length > player.events) {
-    //             const diff = eventList.length - player.events;
-    //             for (
-    //               let i = eventList.length - 1;
-    //               i >= eventList.length - diff;
-    //               i--
-    //             ) {
-    //               const event = eventList[i];
-    //               state.activePlayers.delete(player);
-    //               let updatedPlayer = player;
-    //               updatedPlayer.events = eventList.length;
-    //               state.activePlayers.add(updatedPlayer);
-    //               if (event.stat === "penalties_saved") {
-    //                 events.push(`${player.name} redda akkurat straffe!`);
-    //               } else if (event.stat === "goals_scored") {
-    //                 events.push(`Golazo ${player.name}`);
-    //               } else if (event.stat === "red_cards") {
-    //                 events.push(`Off you pop ${player.name}`);
-    //               } else if (event.stat === "penalties_missed") {
-    //                 events.push(`${player.name} pls`);
-    //               }
-    //             }
-    //           }
-    //         }
-    //       }
-    //     }
-    //   });
-    // }
-    return events;
-};

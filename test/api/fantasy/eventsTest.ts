@@ -1,0 +1,262 @@
+import { checkForNewEvents } from '../../../api/fantasy/events';
+import { PlayerElements, Event, GameState, Player } from '../../../types/Fantasy';
+
+describe('events', () => {
+    describe('checkForEvents', () => {
+        it('correctly returns new events', () => {
+            const elements: PlayerElements = {
+                '1': {
+                    explain: [
+                        [[{ name: 'Minutes played', points: 0, value: 0, stat: 'minutes' }], 31],
+                    ],
+                    stats: {
+                        minutes: 0,
+                        goals_scored: 0,
+                        assists: 0,
+                        clean_sheets: 0,
+                        goals_conceded: 0,
+                        own_goals: 0,
+                        penalties_saved: 0,
+                        penalties_missed: 0,
+                        yellow_cards: 0,
+                        red_cards: 0,
+                        saves: 0,
+                        bonus: 0,
+                        bps: 0,
+                        influence: 0.0,
+                        creativity: 0.0,
+                        threat: 0.0,
+                        ict_index: 0.0,
+                        total_points: 0,
+                        in_dreamteam: false,
+                    },
+                },
+                '2': {
+                    explain: [
+                        [
+                            [
+                                {
+                                    name: 'Minutes played',
+                                    points: 2,
+                                    value: 90,
+                                    stat: 'minutes',
+                                },
+                                {
+                                    name: 'Goals conceded',
+                                    points: -1,
+                                    value: 2,
+                                    stat: 'goals_conceded',
+                                },
+                                { name: 'Saves', points: 2, value: 6, stat: 'saves' },
+                            ],
+                            31,
+                        ],
+                    ],
+                    stats: {
+                        minutes: 90,
+                        goals_scored: 0,
+                        assists: 0,
+                        clean_sheets: 0,
+                        goals_conceded: 2,
+                        own_goals: 0,
+                        penalties_saved: 0,
+                        penalties_missed: 0,
+                        yellow_cards: 0,
+                        red_cards: 0,
+                        saves: 6,
+                        bonus: 0,
+                        bps: 22,
+                        influence: 46.6,
+                        creativity: 0.0,
+                        threat: 0.0,
+                        ict_index: 4.7,
+                        total_points: 3,
+                        in_dreamteam: false,
+                    },
+                },
+                '3': {
+                    explain: [
+                        [[{ name: 'Minutes played', points: 2, value: 90, stat: 'minutes' }], 31],
+                    ],
+                    stats: {
+                        minutes: 90,
+                        goals_scored: 0,
+                        assists: 0,
+                        clean_sheets: 0,
+                        goals_conceded: 1,
+                        own_goals: 0,
+                        penalties_saved: 0,
+                        penalties_missed: 0,
+                        yellow_cards: 0,
+                        red_cards: 0,
+                        saves: 0,
+                        bonus: 0,
+                        bps: 9,
+                        influence: 8.2,
+                        creativity: 25.0,
+                        threat: 12.0,
+                        ict_index: 4.5,
+                        total_points: 2,
+                        in_dreamteam: false,
+                    },
+                },
+                '4': {
+                    explain: [
+                        [[{ name: 'Minutes played', points: 2, value: 90, stat: 'minutes' }], 31],
+                    ],
+                    stats: {
+                        minutes: 90,
+                        goals_scored: 0,
+                        assists: 0,
+                        clean_sheets: 0,
+                        goals_conceded: 1,
+                        own_goals: 0,
+                        penalties_saved: 0,
+                        penalties_missed: 0,
+                        yellow_cards: 0,
+                        red_cards: 0,
+                        saves: 0,
+                        bonus: 0,
+                        bps: 15,
+                        influence: 4.2,
+                        creativity: 3.8,
+                        threat: 0.0,
+                        ict_index: 0.8,
+                        total_points: 2,
+                        in_dreamteam: false,
+                    },
+                },
+                '5': {
+                    explain: [
+                        [[{ name: 'Minutes played', points: 1, value: 1, stat: 'minutes' }], 31],
+                    ],
+                    stats: {
+                        minutes: 1,
+                        goals_scored: 0,
+                        assists: 0,
+                        clean_sheets: 0,
+                        goals_conceded: 0,
+                        own_goals: 0,
+                        penalties_saved: 0,
+                        penalties_missed: 0,
+                        yellow_cards: 0,
+                        red_cards: 0,
+                        saves: 0,
+                        bonus: 0,
+                        bps: 3,
+                        influence: 0.0,
+                        creativity: 0.0,
+                        threat: 0.0,
+                        ict_index: 0.0,
+                        total_points: 1,
+                        in_dreamteam: false,
+                    },
+                },
+                '6': {
+                    explain: [
+                        [[{ name: 'Minutes played', points: 0, value: 0, stat: 'minutes' }], 31],
+                    ],
+                    stats: {
+                        minutes: 0,
+                        goals_scored: 0,
+                        assists: 0,
+                        clean_sheets: 0,
+                        goals_conceded: 0,
+                        own_goals: 0,
+                        penalties_saved: 0,
+                        penalties_missed: 0,
+                        yellow_cards: 0,
+                        red_cards: 0,
+                        saves: 0,
+                        bonus: 0,
+                        bps: 0,
+                        influence: 0.0,
+                        creativity: 0.0,
+                        threat: 0.0,
+                        ict_index: 0.0,
+                        total_points: 0,
+                        in_dreamteam: false,
+                    },
+                },
+                '7': {
+                    explain: [
+                        [
+                            [
+                                {
+                                    name: 'Minutes played',
+                                    points: 2,
+                                    value: 90,
+                                    stat: 'minutes',
+                                },
+                                {
+                                    name: 'Goals scored',
+                                    points: 5,
+                                    value: 1,
+                                    stat: 'goals_scored',
+                                },
+                                { name: 'Bonus', points: 3, value: 3, stat: 'bonus' },
+                            ],
+                            31,
+                        ],
+                    ],
+                    stats: {
+                        minutes: 90,
+                        goals_scored: 1,
+                        assists: 0,
+                        clean_sheets: 0,
+                        goals_conceded: 1,
+                        own_goals: 0,
+                        penalties_saved: 0,
+                        penalties_missed: 0,
+                        yellow_cards: 0,
+                        red_cards: 0,
+                        saves: 0,
+                        bonus: 3,
+                        bps: 37,
+                        influence: 58.0,
+                        creativity: 43.2,
+                        threat: 36.0,
+                        ict_index: 13.7,
+                        total_points: 10,
+                        in_dreamteam: true,
+                    },
+                },
+            };
+            const actual = 'stuff';
+            const player: Player = {
+                element: 1,
+                position: 9,
+                name: 'Jenny',
+                currentScore: 0,
+                events: [{ name: 'Minutes played', points: 0, value: 0, stat: 'minutes' }],
+                messagesSent: 0,
+            };
+            const currentState: GameState = {
+                activePlayers: {
+                    '0': player,
+                    '1': player,
+                    '2': player,
+                    '3': player,
+                },
+                currentGameweek: 0,
+                fantasyTeams: [
+                    {
+                        currentGameweekTeam: [player],
+                        id: 0,
+                        name: 'ye',
+                        gameweekScore: 12,
+                        totalScore: 15,
+                    },
+                ],
+                messages: [],
+                playerData: [
+                    {
+                        id: 1,
+                        second_name: 'ja',
+                    },
+                ],
+            };
+            expect(checkForNewEvents(currentState, elements)).toEqual(actual);
+        });
+    });
+});
