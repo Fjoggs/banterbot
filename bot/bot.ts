@@ -89,13 +89,23 @@ client.on('messageCreate', async (message) => {
         });
     }
     if (messageIsEqual('!stats')) {
-        getStatsTop5((emojies: Array<Stats>) => {
-            printStats(emojies);
-        });
+        try {
+            getStatsTop5((emojies: Array<Stats>) => {
+                printStats(emojies);
+            });
+        } catch (error) {
+            //@ts-expect-error
+            debugChannel.send(`Command !stats failed with error: ${error}`);
+        }
     } else if (messageIsEqual('!statsall')) {
-        getStatsAll((emojies: Array<Stats>) => {
-            printStats(emojies);
-        });
+        try {
+            getStatsAll((emojies: Array<Stats>) => {
+                printStats(emojies);
+            });
+        } catch (error) {
+            //@ts-expect-error
+            debugChannel.send(`Command !statsall failed with error: ${error}`);
+        }
     } else if (messageIncludes('!mute')) {
         mute = true;
         //@ts-ignore
