@@ -1,13 +1,6 @@
 import * as Discord from 'discord.js';
 import { fetchData } from '../api/parser';
-import {
-    checkForEvents,
-    getCurrentGameweek,
-    getLiveData,
-    getMessages,
-    resetMessages,
-    updateGameweek,
-} from '../api/api';
+import { getCurrentGameweek, getLiveData, updateGameweek } from '../api/api';
 
 import { checkForBanter } from './banter';
 import { getStatsAll, getStatsTop5, insertOrUpdateUsage, Stats } from '../api/db/general';
@@ -124,21 +117,21 @@ client.on('messageCreate', async (message) => {
 
 setInterval(() => {
     console.log('polling for messages');
-    updateGameweek();
-    const events = checkForEvents(liveData);
-    const messages = getMessages(events);
+    updateGameweek(debugChannel);
+    // const events = checkForEvents(liveData);
+    // const messages = getMessages(events);
     if (isNewYear()) {
         //@ts-ignore
         channel.send('https://www.youtube.com/watch?v=on1Arneo-jc');
     }
 
-    messages.forEach((message) => {
-        if (!mute) {
-            //@ts-ignore
-            channel.send(message);
-        }
-    });
-    resetMessages();
+    // messages.forEach((message) => {
+    //     if (!mute) {
+    //         //@ts-ignore
+    //         channel.send(message);
+    //     }
+    // });
+    // resetMessages();
 }, 60 * 1000); // Every minute
 
 const isNewYear = () => {

@@ -14,16 +14,20 @@ let state: GameState = {
     playerData: [],
     currentGameweek: 0,
     fantasyTeams: [],
-    activePlayers: new Set(),
+    activePlayers: {},
     messages: [],
 };
 
 const apiUrl = 'https://draft.premierleague.com/api';
 
-export const updateGameweek = async () => {
-    const response = await fetch(`${apiUrl}/bootstrap-static`);
-    const json: Bootstrap = await getBootstrapData(response);
-    state.currentGameweek = json.events.current;
+export const updateGameweek = async (debugChannel) => {
+    try {
+        const response = await fetch(`${apiUrl}/bootstrap-static`);
+        const json: Bootstrap = (await response.json()) as Bootstrap;
+        state.currentGameweek = json.events.current;
+    } catch (error) {
+        debugChannel.send(`updateGameweek failed with error: ${error}`);
+    }
 };
 
 export const getCurrentGameweek = () => state.currentGameweek;
@@ -31,27 +35,24 @@ export const getCurrentGameweek = () => state.currentGameweek;
 export const getAsyncData = async (debugChannel): Promise<GameState> => {
     try {
         const response = await fetch(`${apiUrl}/bootstrap-static`);
-        const json: Bootstrap = await getBootstrapData(response);
+        const json: Bootstrap = (await response.json()) as Bootstrap;
         state.playerData = json.elements;
         state.currentGameweek = json.events.current || 1;
         state.fantasyTeams = await getLeagueInfo(debugChannel);
         state.fantasyTeams.forEach((fantasyTeam) => {
             getGWStatsForTeam(fantasyTeam, debugChannel);
         });
-        return state;
     } catch (error) {
         debugChannel.send(`getAsyncData failed with error: ${error}`);
-        return state;
     }
+    return state;
 };
-
-const getBootstrapData = async (response): Promise<Bootstrap> => await response.json();
 
 export const getLiveData = async (debugChannel) => {
     let json: Array<unknown> = [];
     try {
         const response = await fetch(`${apiUrl}/event/${state.currentGameweek}/live`);
-        json = await response.json();
+        json = (await response.json()) as Array<unknown>;
     } catch (error) {
         debugChannel.send(`getLiveData failed with error: ${error}`);
     }
@@ -62,7 +63,7 @@ const getLeagueInfo = async (debugChannel) => {
     let fantasyTeams: Array<FantasyTeam> = [];
     try {
         const response = await fetch(`${apiUrl}/league/81059/details`);
-        const leagueDetails: LeagueDetails = await response.json();
+        const leagueDetails: LeagueDetails = (await response.json()) as LeagueDetails;
         leagueDetails.league_entries.forEach((fantasyTeam) => {
             fantasyTeams.push({
                 id: fantasyTeam.entry_id,
@@ -81,7 +82,7 @@ const getGWStatsForTeam = async (fantasyTeam: FantasyTeam, debugChannel) => {
         const response = await fetch(
             `${apiUrl}/entry/${fantasyTeam.id}/event/${state.currentGameweek}`
         );
-        const gameweekStats: GameweekStats = await response.json();
+        const gameweekStats: GameweekStats = (await response.json()) as GameweekStats;
 
         gameweekStats.picks.forEach((player: Player) => {
             getPlayerInfo(fantasyTeam, player, debugChannel);
@@ -95,7 +96,7 @@ const getGWStatsForTeam = async (fantasyTeam: FantasyTeam, debugChannel) => {
 const getPlayerInfo = async (fantasyTeam, player: Player, debugChannel) => {
     try {
         const playerResponse = await fetch(`${apiUrl}/element-summary/${player.element}`);
-        const playerDetails: PlayerDetails = await getPlayerInfoData(playerResponse);
+        const playerDetails: PlayerDetails = await playerResponse.json();
 
         const historyArray = playerDetails.history || [];
         const lastMatch = historyArray.pop();
@@ -114,7 +115,7 @@ const getPlayerInfo = async (fantasyTeam, player: Player, debugChannel) => {
                     minutesPlayed: lastMatch.minutes,
                     messagesSent: 0,
                 };
-                state.activePlayers.add(currentPlayer);
+                state.activePlayers[player.element] = currentPlayer;
                 counter = counter + 1;
                 fantasyTeam.currentGameweekTeam.push(currentPlayer);
                 return true;
@@ -125,12 +126,10 @@ const getPlayerInfo = async (fantasyTeam, player: Player, debugChannel) => {
     }
 };
 
-const getPlayerInfoData = async (response): Promise<PlayerDetails> => await response.json();
-
 const gameweekScore = async (fantasyTeam: FantasyTeam, debugChannel) => {
     try {
         const response = await fetch(`${apiUrl}/entry/${fantasyTeam.id}/public`);
-        const json: GameweekScore = await response.json();
+        const json: GameweekScore = (await response.json()) as GameweekScore;
 
         fantasyTeam.gameweekScore = json.entry.event_points;
 
@@ -139,61 +138,3 @@ const gameweekScore = async (fantasyTeam: FantasyTeam, debugChannel) => {
         debugChannel.send(`gameweekScore failed with error: ${error}`);
     }
 };
-
-export const checkForEventsWithState = (data, incomingState) => {
-    state = incomingState;
-    checkForEvents(data);
-};
-
-export const checkForEvents = (data) => {
-    const elements = data.elements;
-    let events = [];
-    if (state.activePlayers) {
-        state.activePlayers.forEach((player) => {
-            try {
-                const eventList = elements[player.element].explain[0][0] || [];
-                if (eventList.length > player.events.length) {
-                    let updatedPlayer;
-                    eventList.forEach((event) => {
-                        state.activePlayers.delete(player);
-                        updatedPlayer.events.push({
-                            stat: event.stat,
-                            points: event.points,
-                            value: event.value,
-                        });
-                        state.activePlayers.add(updatedPlayer);
-                    });
-                }
-            } catch {
-                // console.log('error');
-            }
-        });
-    }
-    return state;
-};
-
-export const getState = () => state;
-
-export const getMessagesWithState = (events, incomingState) => {
-    state = incomingState;
-    return getMessages(events);
-};
-
-export const getMessages = (events): Array<String> => {
-    if (events?.length > 1) {
-        events.forEach((event: { stat: string; playerName: any }) => {
-            if (event.stat === 'penalties_saved') {
-                state.messages.push(`${event.playerName} redda akkurat straffe!`);
-            } else if (event.stat === 'goals_scored') {
-                state.messages.push(`Golazo ${event.playerName}`);
-            } else if (event.stat === 'red_cards') {
-                state.messages.push(`Off you pop ${event.playerName}`);
-            } else if (event.stat === 'penalties_missed') {
-                state.messages.push(`${event.playerName} pls`);
-            }
-        });
-    }
-    return state.messages;
-};
-
-export const resetMessages = () => (state.messages = []);

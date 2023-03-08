@@ -1,11 +1,12 @@
-import * as Koa from 'koa';
-import * as Router from 'koa-router';
+import Koa from 'koa';
+import Router from 'koa-router';
 import fetch from 'node-fetch';
 
-import { checkForEvents, getAsyncData, getLiveData, GameState } from './api/api';
+import { getAsyncData, getLiveData } from './api/api';
 import { getWinners } from './api/db/bets';
 import { addChallenge } from './api/db/challenges';
 import { luckernoobOfTheWeek, rittardOfTheWeek, topDickOfTheWeek } from './api/parser';
+import { GameState } from './types/Fantasy';
 
 const app = new Koa();
 const router = new Router<Koa.DefaultState, Koa.Context>();
@@ -19,10 +20,6 @@ const getData = async () => {
 };
 getData();
 
-router.get('/', (ctx, next) => {
-    ctx.body = Array.from(state.activePlayers);
-});
-
 router.get('/rittard', (ctx, next) => {
     ctx.body = rittardOfTheWeek();
 });
@@ -35,10 +32,7 @@ router.get('/luckernoob', (ctx, next) => {
     ctx.body = luckernoobOfTheWeek();
 });
 
-router.get('/live', (ctx, next) => {
-    const events = checkForEvents(liveData);
-    ctx.body = events;
-});
+router.get('/live', (ctx, next) => {});
 
 router.get('/live1', (ctx, next) => {
     const data = {
@@ -66,9 +60,6 @@ router.get('/live1', (ctx, next) => {
             },
         },
     };
-    console.log('data', data);
-    const events = checkForEvents(data);
-    ctx.body = events;
 });
 
 router.get('/live2', (ctx, next) => {
@@ -103,8 +94,6 @@ router.get('/live2', (ctx, next) => {
             },
         },
     };
-    const events = checkForEvents(data);
-    ctx.body = events;
 });
 
 router.get('/db/challenge/insert', (ctx, next) => {

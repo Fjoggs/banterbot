@@ -141,6 +141,8 @@ export const checkForBanter = (msg: Discord.Message, channel, client, debugChann
         const response = [
             'https://gfycat.com/wigglyneatgrackle',
             'https://cdn.discordapp.com/attachments/110121552934100992/863911058699714560/pogmobile.gif',
+            'https://cdn.discordapp.com/attachments/110121552934100992/1016034700919324832/pogges.gif',
+            'https://cdn.discordapp.com/attachments/110121552934100992/1016034769764622406/poggis.gif',
         ];
         const luckyNumber = Math.floor(Math.random() * response.length);
         channel.send(response[luckyNumber]);
@@ -369,13 +371,14 @@ export const checkForBanter = (msg: Discord.Message, channel, client, debugChann
         );
     } else if (messageIncludes('!lantime')) {
         const currentDate = new Date();
-        const lanDate = new Date('2022-07-22');
-        const endOfLan = new Date('2022-08-01');
-        const nextLanDate = new Date('2033-07-21');
+        let lanDate = new Date('2023-07-21');
+        const endOfLan = new Date('2023-07-31');
+        const nextLanDate = new Date('2024-07-19');
 
         const daysUntilLan = Math.ceil(
             (lanDate.getTime() - currentDate.getTime()) / 1000 / 60 / 60 / 24
         );
+
         let emoji;
         let isLan = false;
 
@@ -394,6 +397,9 @@ export const checkForBanter = (msg: Discord.Message, channel, client, debugChann
             emoji = client.emojis.cache.find((emoji) => emoji.name === 'sadge');
         } else if (daysUntilLan > 120) {
             emoji = client.emojis.cache.find((emoji) => emoji.name === 'pepehands');
+        } else if (currentDate.getTime() - endOfLan.getTime() > 0) {
+            isLan = false;
+            lanDate = nextLanDate;
         }
         if (
             previousDate &&
@@ -452,7 +458,6 @@ export const checkForBanter = (msg: Discord.Message, channel, client, debugChann
             channel.send(`${daysUntilLan} dager til lan ${emoji.toString()}`);
         }
         previousDate = currentDate;
-        console.log('previousDate', previousDate.toLocaleDateString());
     }
 };
 
