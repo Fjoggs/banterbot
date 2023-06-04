@@ -1,0 +1,4 @@
+CREATE TABLE [gress] (
+        [name] NVARCHAR(100) NOT NULL PRIMARY KEY,
+		[counter] INTEGER NOT NULL
+);

@@ -1,8 +1,10 @@
 import * as Discord from 'discord.js';
 import fetch from 'node-fetch';
 import {
+    getGress,
     getRandom,
-    increaseJamesCounter,
+    GressEntry,
+    increaseGressCounter,
     increaseLukakuCounter,
     RandomEntry,
 } from '../api/db/general';
@@ -18,6 +20,7 @@ interface PowerPriceResponse {
 
 let hypeCounter = 0;
 let previousDate = new Date();
+const gressRegex = /^!gress&/;
 
 export const checkForBanter = (msg: Discord.Message, channel, client, debugChannel) => {
     const messageIncludes = (phrase: string) => msg.content.toLowerCase().includes(phrase);
@@ -158,6 +161,7 @@ export const checkForBanter = (msg: Discord.Message, channel, client, debugChann
     } else if (messageIncludes('!jebaited')) {
         const response = [
             'https://tenor.com/view/immobile-football-euro2020-edmw-hao-le-hao-le-gif-22197371',
+            'https://cdn.discordapp.com/attachments/601491418820902918/1108881757102669865/2023-05-18_23-57-08.gif',
         ];
         const luckyNumber = Math.floor(Math.random() * response.length);
         channel.send(response[luckyNumber]);
@@ -178,18 +182,42 @@ export const checkForBanter = (msg: Discord.Message, channel, client, debugChann
         channel.send(response[luckyNumber]);
         // const emoji = client.emojis.cache.find((emoji) => emoji.name === 'feelsbadman');
         // channel.send(`Ole's wild ride has crashed ${emoji.toString()}`);
-    } else if (messageIncludes('!james')) {
+    } else if (messageIncludes('!konsept')) {
+        const response = [
+            '"Frokost"',
+            '"DNB"',
+            '"ChatGPT"',
+            '"Indeksfond"',
+            '"Demokrati"',
+            '"Krigen i Ukraina"',
+            '"!Ramos"',
+            '"SommerLAN"',
+            '"Strømprisene"',
+            '"BanterBOT"',
+            '"Ferrari"',
+            '"Motta varer, avgi betaling"',
+            '"Kvinnefotball"',
+            '"Konsept"',
+            '"Nettbank"',
+        ];
+        const luckyNumber = Math.floor(Math.random() * response.length);
+        channel.send(`${response[luckyNumber]}, et konsept fra DNB©`);
+    } else if (messageIncludes('!gress')) {
+        const playerName = msg.content.toLowerCase().split('!gress ')[1];
         const emoji = client.emojis.cache.find((emoji) => emoji.name === 'pepegress');
-        increaseJamesCounter(() => {
-            getRandom((randomEntry: RandomEntry) => {
-                if (randomEntry.jamesCounter === 1) {
+        increaseGressCounter(playerName, () => {
+            getGress(playerName, (gressEntry: GressEntry) => {
+                const upperCaseName = playerName.charAt(0).toUpperCase() + playerName.slice(1);
+                if (gressEntry.counter === 1) {
                     channel.send(
-                        `James har spist gress ${randomEntry.jamesCounter} gang ${emoji.toString()}`
+                        `${upperCaseName} har spist gress ${
+                            gressEntry.counter
+                        } gang ${emoji.toString()}`
                     );
                 } else {
                     channel.send(
-                        `James har spist gress ${
-                            randomEntry.jamesCounter
+                        `${upperCaseName} har spist gress ${
+                            gressEntry.counter
                         } ganger ${emoji.toString()}`
                     );
                 }
