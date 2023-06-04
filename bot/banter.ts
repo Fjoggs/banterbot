@@ -297,35 +297,39 @@ export const checkForBanter = (msg: Discord.Message, channel, client, debugChann
             channel.send(`-${playerOut} +${playerIn}`);
         }
     } else if (messageIncludes('!sperregrensa')) {
-        fetch('https://valgresultat.no/api/2021/st').then((response) =>
-            response.json().then(
-                (data: {
-                    partier: Array<{
-                        id: {
-                            navn: string;
-                        };
-                        stemmer: {
-                            resultat: {
-                                prosent: number;
+        fetch('https://valgresultat.no/api/2021/st')
+            .then((response) =>
+                response.json().then(
+                    (data: {
+                        partier: Array<{
+                            id: {
+                                navn: string;
                             };
-                        };
-                    }>;
-                }) => {
-                    const parties = data.partier;
-                    const ripParties = [];
-                    const happyParties = [];
-                    let message = 'F i chat til ';
-                    parties.forEach((party) => {
-                        if (party.stemmer.resultat.prosent >= 4) {
-                            happyParties.push(party.id.navn);
-                        } else if (party.stemmer.resultat.prosent > 2) {
-                            message += `${party.id.navn}, `;
-                        }
-                    });
-                    channel.send(`${message}og my annet ræl.`);
-                }
+                            stemmer: {
+                                resultat: {
+                                    prosent: number;
+                                };
+                            };
+                        }>;
+                    }) => {
+                        const parties = data.partier;
+                        const ripParties = [];
+                        const happyParties = [];
+                        let message = 'F i chat til ';
+                        parties.forEach((party) => {
+                            if (party.stemmer.resultat.prosent >= 4) {
+                                happyParties.push(party.id.navn);
+                            } else if (party.stemmer.resultat.prosent > 2) {
+                                message += `${party.id.navn}, `;
+                            }
+                        });
+                        channel.send(`${message}og my annet ræl.`);
+                    }
+                )
             )
-        );
+            .catch((error) => {
+                debugChannel.send(`!sperregrensa failed: ${error}`);
+            });
     } else if (messageIncludes('!foxymoxy')) {
         channel.send('Millionærene.');
     } else if (messageIncludes('!mornajens')) {
@@ -336,67 +340,79 @@ export const checkForBanter = (msg: Discord.Message, channel, client, debugChann
         const currentDate = new Date();
         const currentYear = currentDate.getFullYear();
         let nextRace;
-        fetch(`https://ergast.com/api/f1/${currentYear}.json`).then((response) =>
-            response.json().then(
-                (data: {
-                    MRData: {
-                        RaceTable: {
-                            Races: Array<{
-                                date: string;
-                                time: string;
-                            }>;
+        fetch(`https://ergast.com/api/f1/${currentYear}.json`)
+            .then((response) =>
+                response.json().then(
+                    (data: {
+                        MRData: {
+                            RaceTable: {
+                                Races: Array<{
+                                    date: string;
+                                    time: string;
+                                }>;
+                            };
                         };
-                    };
-                }) => {
-                    const races = data.MRData.RaceTable.Races;
-                    for (let index = 0; index < races.length; index++) {
-                        const race = races[index];
-                        const raceDate = new Date(`${race.date} ${race.time}`);
-                        nextRace = race;
-                        if (raceDate > currentDate) {
-                            const formattedDate = raceDate.toLocaleDateString('no-NO', {
-                                day: 'numeric',
-                                month: 'long',
-                                year: 'numeric',
-                            });
-                            const formattedTime = raceDate.toLocaleTimeString('no-NO', {
-                                hour12: false,
-                            });
-                            channel.send(
-                                `**Hva**: ${nextRace.raceName}, **Hvor**: ${nextRace.Circuit.circuitName}, **Når**: ${formattedDate}, ${formattedTime}`
-                            );
-                            break;
+                    }) => {
+                        const races = data.MRData.RaceTable.Races;
+                        for (let index = 0; index < races.length; index++) {
+                            const race = races[index];
+                            const raceDate = new Date(`${race.date} ${race.time}`);
+                            nextRace = race;
+                            if (raceDate > currentDate) {
+                                const formattedDate = raceDate.toLocaleDateString('no-NO', {
+                                    day: 'numeric',
+                                    month: 'long',
+                                    year: 'numeric',
+                                });
+                                const formattedTime = raceDate.toLocaleTimeString('no-NO', {
+                                    hour12: false,
+                                });
+                                channel.send(
+                                    `**Hva**: ${nextRace.raceName}, **Hvor**: ${nextRace.Circuit.circuitName}, **Når**: ${formattedDate}, ${formattedTime}`
+                                );
+                                break;
+                            }
                         }
                     }
-                }
+                )
             )
-        );
+            .catch((error) => {
+                debugChannel.send(`!racetime failed: ${error}`);
+            });
     } else if (messageIncludes('!zaposlo')) {
-        fetch('https://www.ge.no/api/price/area/NO1').then((response) =>
-            response.json().then((data: Array<PowerPriceResponse>) => {
-                let totalPrice = 0;
-                let supplierCount = 0;
-                data.forEach((supplier) => {
-                    totalPrice += supplier.price;
-                    supplierCount++;
-                });
-                const avgPrice = (totalPrice / supplierCount).toFixed(2);
-                channel.send(`Snittpris strøm Oslo: ${avgPrice}`);
-            })
-        );
+        fetch('https://www.ge.no/api/price/area/NO1')
+            .then((response) =>
+                response.json().then((data: Array<PowerPriceResponse>) => {
+                    let totalPrice = 0;
+                    let supplierCount = 0;
+                    data.forEach((supplier) => {
+                        totalPrice += supplier.price;
+                        supplierCount++;
+                    });
+                    const avgPrice = (totalPrice / supplierCount).toFixed(2);
+                    channel.send(`Snittpris strøm Oslo: ${avgPrice}`);
+                })
+            )
+            .catch((error) => {
+                debugChannel.send(`!zaposlo failed: ${error}`);
+            });
     } else if (messageIncludes('!zapsvg')) {
-        fetch('https://www.ge.no/api/price/area/NO2').then((response) =>
-            response.json().then((data: Array<PowerPriceResponse>) => {
-                let totalPrice = 0;
-                let supplierCount = 0;
-                data.forEach((supplier) => {
-                    totalPrice += supplier.price;
-                    supplierCount++;
-                });
-                const avgPrice = (totalPrice / supplierCount).toFixed(2);
-                channel.send(`Snittpris strøm Stavanger: ${avgPrice}`);
-            })
-        );
+        fetch('https://www.ge.no/api/price/area/NO2')
+            .then((response) =>
+                response.json().then((data: Array<PowerPriceResponse>) => {
+                    let totalPrice = 0;
+                    let supplierCount = 0;
+                    data.forEach((supplier) => {
+                        totalPrice += supplier.price;
+                        supplierCount++;
+                    });
+                    const avgPrice = (totalPrice / supplierCount).toFixed(2);
+                    channel.send(`Snittpris strøm Stavanger: ${avgPrice}`);
+                })
+            )
+            .catch((error) => {
+                debugChannel.send(`!zapsvg failed: ${error}`);
+            });
     } else if (messageIncludes('!lantime')) {
         const currentDate = new Date();
         let lanDate = new Date('2023-07-21');
