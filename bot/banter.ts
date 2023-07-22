@@ -18,6 +18,11 @@ interface PowerPriceResponse {
     price: number;
 }
 
+interface RaceTime {
+    date: string;
+    time: string;
+}
+
 let hypeCounter = 0;
 let previousDate = new Date();
 const gressRegex = /^!gress&/;
@@ -177,6 +182,23 @@ export const checkForBanter = (msg: Discord.Message, channel, client, debugChann
             `I'm not paying that much to get on ${manager}'s wild ride`,
             `I want to get off ${manager}'s wild ride`,
             `I've been queuing for ${manager}'s wild ride for ages`,
+        ];
+        const luckyNumber = Math.floor(Math.random() * response.length);
+        channel.send(response[luckyNumber]);
+        // const emoji = client.emojis.cache.find((emoji) => emoji.name === 'feelsbadman');
+        // channel.send(`Ole's wild ride has crashed ${emoji.toString()}`);
+    } else if (messageIncludes('!villreise')) {
+        const manager = 'Bakke';
+        const response = [
+            `Jeg blir dårlig bare av å se på ${manager}s ville reise`,
+            `${manager}s ville reise ser for intens ut for meg`,
+            `${manager}s ville reise er virkelig verdt penga!`,
+            `${manager}s ville reise var topp!`,
+            `Jeg gåkke på ${manager}s ville reise når det regner.`,
+            `Jeg vil kjøre noe mer spennende ${manager}s ville reise`,
+            `Jeg betaler ikke så mye for å kjøre ${manager}s ville reise`,
+            `Slepp meg av ${manager}s ville reise`,
+            `Jeg har stått i kø for ${manager}s vill reise i en evighet`,
         ];
         const luckyNumber = Math.floor(Math.random() * response.length);
         channel.send(response[luckyNumber]);
@@ -349,6 +371,11 @@ export const checkForBanter = (msg: Discord.Message, channel, client, debugChann
                                 Races: Array<{
                                     date: string;
                                     time: string;
+                                    FirstPractice?: RaceTime;
+                                    SecondPractice?: RaceTime;
+                                    ThirdPractice?: RaceTime;
+                                    Qualifying?: RaceTime;
+                                    Sprint?: RaceTime;
                                 }>;
                             };
                         };
@@ -367,9 +394,52 @@ export const checkForBanter = (msg: Discord.Message, channel, client, debugChann
                                 const formattedTime = raceDate.toLocaleTimeString('no-NO', {
                                     hour12: false,
                                 });
-                                channel.send(
-                                    `**Hva**: ${nextRace.raceName}, **Hvor**: ${nextRace.Circuit.circuitName}, **Når**: ${formattedDate}, ${formattedTime}`
-                                );
+                                let message = `**Hva**: ${nextRace.raceName}, **Hvor**: ${nextRace.Circuit.circuitName}, **Når**: ${formattedDate}, ${formattedTime}\n`;
+                                let multiLine = false;
+                                if (race.Sprint) {
+                                    const sprintDate = new Date(
+                                        `${race.Sprint.date} ${race.Sprint.time}`
+                                    );
+                                    const formattedSprint = sprintDate.toLocaleDateString('no-NO', {
+                                        day: 'numeric',
+                                        month: 'long',
+                                        year: 'numeric',
+                                    });
+                                    const formattedSprintTime = sprintDate.toLocaleTimeString(
+                                        'no-NO',
+                                        {
+                                            hour12: false,
+                                        }
+                                    );
+                                    message += `**Sprint**: ${formattedSprint}, ${formattedSprintTime}\n`;
+                                    multiLine = true;
+                                }
+                                if (race.Qualifying) {
+                                    const qualifyingDate = new Date(
+                                        `${race.Qualifying.date} ${race.Qualifying.time}`
+                                    );
+                                    const formattedQualifying = qualifyingDate.toLocaleDateString(
+                                        'no-NO',
+                                        {
+                                            day: 'numeric',
+                                            month: 'long',
+                                            year: 'numeric',
+                                        }
+                                    );
+                                    const formattedQualiTime = qualifyingDate.toLocaleTimeString(
+                                        'no-NO',
+                                        {
+                                            hour12: false,
+                                        }
+                                    );
+                                    message += `**Kvalikk**: ${formattedQualifying}, ${formattedQualiTime}`;
+                                    multiLine = true;
+                                }
+                                if (multiLine) {
+                                    channel.send(`\n${message}`);
+                                } else {
+                                    channel.send(message);
+                                }
                                 break;
                             }
                         }
