@@ -218,7 +218,6 @@ export const checkForBanter = (msg: Discord.Message, channel, client, debugChann
             '"BanterBOT"',
             '"Ferrari"',
             '"Motta varer, avgi betaling"',
-            '"Kvinnefotball"',
             '"Konsept"',
             '"Nettbank"',
         ];
