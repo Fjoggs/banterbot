@@ -484,8 +484,8 @@ export const checkForBanter = (msg: Discord.Message, channel, client, debugChann
             });
     } else if (messageIncludes('!lantime')) {
         const currentDate = new Date();
-        let lanDate = new Date('2023-07-21');
-        const endOfLan = new Date('2023-07-31');
+        let lanDate = new Date('2024-07-19');
+        const endOfLan = new Date('2024-07-31');
         const nextLanDate = new Date('2024-07-19');
 
         const daysUntilLan = Math.ceil(
@@ -571,6 +571,10 @@ export const checkForBanter = (msg: Discord.Message, channel, client, debugChann
             channel.send(`${daysUntilLan} dager til lan ${emoji.toString()}`);
         }
         previousDate = currentDate;
+    } else if (messageIncludes('!kjolensier')) {
+        const response = [`Ja`, 'Nei', 'Kanskje', 'MORRACHKNULL'];
+        const luckyNumber = Math.floor(Math.random() * response.length);
+        channel.send(response[luckyNumber]);
     }
 };
 
