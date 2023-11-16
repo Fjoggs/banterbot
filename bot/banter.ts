@@ -575,6 +575,11 @@ export const checkForBanter = (msg: Discord.Message, channel, client, debugChann
         const response = [`Ja`, 'Nei', 'Kanskje', 'MORRACHKNULL'];
         const luckyNumber = Math.floor(Math.random() * response.length);
         channel.send(response[luckyNumber]);
+    } else if (messageIncludes('!pila')) {
+        const min = Math.ceil(0);
+        const max = Math.floor(100);
+        const chance = Math.floor(Math.random() * (max - min) + min);
+        channel.send(`${chance}%`);
     }
 };
 
