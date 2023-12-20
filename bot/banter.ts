@@ -580,6 +580,10 @@ export const checkForBanter = (msg: Discord.Message, channel, client, debugChann
         const max = Math.floor(100);
         const chance = Math.floor(Math.random() * (max - min) + min);
         channel.send(`${chance}%`);
+    } else if (messageIncludes('!wideramos')) {
+        const response = ['https://sleeperop.com/gifs/wideramos.gif'];
+        const luckyNumber = Math.floor(Math.random() * response.length);
+        channel.send(response[luckyNumber]);
     }
 };
 
