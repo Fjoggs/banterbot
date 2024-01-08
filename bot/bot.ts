@@ -19,10 +19,11 @@ const client = new Discord.Client({
 });
 
 let channel: Discord.Channel | undefined;
+
 let testChannel: Discord.Channel | undefined;
 let debugChannel: Discord.Channel | undefined;
 let mute = true;
-let currentYear = 2023;
+let currentYear = 2024;
 
 const preikGuildId = '110121552934100992';
 const fjoggsGeneralGuildId = '774731038391140375';
