@@ -9,18 +9,11 @@ export const checkForNewEvents = (state: GameState, incomingElements: PlayerElem
                 const currentEvents = state.activePlayers[elementId].events;
                 if (incomingEvents.length > currentEvents.length) {
                     const diff = incomingEvents.length - currentEvents.length;
-                    console.log('incomingEvenets', incomingEvents);
-                    console.log('currentEvents', currentEvents);
-                    console.log('elementId', elementId);
-                    console.log('diff', diff);
                     let newEvents: Event[] = [];
                     for (let i = diff; i > 0; i--) {
-                        console.log('index', i);
                         const event = incomingEvents[i];
-                        console.log('event', event);
                         newEvents.push(event);
                     }
-                    console.log('newEvents', newEvents);
                 }
             } else {
                 console.log('oops');

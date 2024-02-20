@@ -38,16 +38,12 @@ client.once('ready', () => {
 
     runAndReport(
         async () => {
-            console.log('inside 1');
             await fetchData(debugChannel);
-            console.log('inside 2');
             liveData = await getLiveData(debugChannel);
-            console.log('liveData', liveData);
         },
         debugChannel,
         'Fetch draft data on startup'
     );
-    console.log('liveData', liveData);
 });
 
 client.login(env.TOKEN);
@@ -117,7 +113,6 @@ client.on('messageCreate', async (message) => {
         //@ts-ignore
         channel.send(`Spam back on the menu ${emoji.toString()}`);
     } else if (messageIncludes('!current')) {
-        console.log('current', getCurrentGameweek());
         //@ts-ignore
         debugChannel.send(`FPL-gw: ${getCurrentGameweek()}`);
     }

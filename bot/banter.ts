@@ -382,7 +382,13 @@ export const checkForBanter = (msg: Discord.Message, channel, client, debugChann
                         const races = data.MRData.RaceTable.Races;
                         for (let index = 0; index < races.length; index++) {
                             const race = races[index];
-                            const raceDate = new Date(`${race.date} ${race.time}`);
+                            let raceDate = new Date(race.date);
+                            let hasTime = false;
+                            if (race.time) {
+                                raceDate = new Date(`${race.date} ${race.time}`);
+                                hasTime = true;
+                            }
+                            // const raceDate = new Date(`${race.date} ${race.time}`);
                             nextRace = race;
                             if (raceDate > currentDate) {
                                 const formattedDate = raceDate.toLocaleDateString('no-NO', {
@@ -393,7 +399,10 @@ export const checkForBanter = (msg: Discord.Message, channel, client, debugChann
                                 const formattedTime = raceDate.toLocaleTimeString('no-NO', {
                                     hour12: false,
                                 });
-                                let message = `**Hva**: ${nextRace.raceName}, **Hvor**: ${nextRace.Circuit.circuitName}, **Når**: ${formattedDate}, ${formattedTime}\n`;
+                                let message = `**Hva**: ${nextRace.raceName}, **Hvor**: ${nextRace.Circuit.circuitName}, **Når**: ${formattedDate}\n`;
+                                if (hasTime) {
+                                    message = `**Hva**: ${nextRace.raceName}, **Hvor**: ${nextRace.Circuit.circuitName}, **Når**: ${formattedDate}, ${formattedTime}\n`;
+                                }
                                 let multiLine = false;
                                 if (race.Sprint) {
                                     const sprintDate = new Date(
