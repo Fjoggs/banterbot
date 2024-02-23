@@ -66,9 +66,7 @@ export const checkForBanter = (msg: Discord.Message, channel, client, debugChann
             '!var'
         );
     } else if (messageIncludes('!toto')) {
-        channel.send(
-            'https://cdn.discordapp.com/attachments/110121552934100992/917145089862676520/totorage.gif'
-        );
+        channel.send('https://sleeperop.com/gifs/totorage.gif');
     } else if (messageIncludes('!fia')) {
         runAndReport(
             () => {
@@ -172,11 +170,13 @@ export const checkForBanter = (msg: Discord.Message, channel, client, debugChann
         runAndReport(
             () => {
                 const response = [
-                    'https://i.redd.it/ktbd2jkzxh761.gif',
-                    'https://i.imgur.com/Ci4WQ0Q.gif',
-                    'https://zippy.gfycat.com/BruisedFlawlessAngwantibo.webm',
-                    'https://zippy.gfycat.com/MasculineAgedBlowfish.webm',
-                    'https://i.imgur.com/Lb9KSKa.mp4',
+                    'https://sleeperop.com/gifs/jose/jose-1.gif',
+                    'https://sleeperop.com/gifs/jose/jose-2.gif',
+                    'https://sleeperop.com/gifs/jose/jose-3.mp4',
+                    'https://sleeperop.com/gifs/jose/jose-4.gif',
+                    'https://sleeperop.com/gifs/jose/jose-5.mp4',
+                    'https://sleeperop.com/gifs/jose/jose-6.mp4',
+                    'https://sleeperop.com/gifs/jose/jose-7.gif',
                 ];
                 const luckyNumber = Math.floor(Math.random() * response.length);
                 channel.send(response[luckyNumber]);
@@ -188,10 +188,9 @@ export const checkForBanter = (msg: Discord.Message, channel, client, debugChann
         runAndReport(
             () => {
                 const response = [
-                    'https://gfycat.com/wigglyneatgrackle',
-                    'https://cdn.discordapp.com/attachments/110121552934100992/863911058699714560/pogmobile.gif',
-                    'https://cdn.discordapp.com/attachments/110121552934100992/1016034700919324832/pogges.gif',
-                    'https://cdn.discordapp.com/attachments/110121552934100992/1016034769764622406/poggis.gif',
+                    'https://sleeperop.com/gifs/pog/pog-1.gif',
+                    'https://sleeperop.com/gifs/pog/pog-2.gif',
+                    'https://sleeperop.com/gifs/pog/pog-3.gif',
                 ];
                 const luckyNumber = Math.floor(Math.random() * response.length);
                 channel.send(response[luckyNumber]);
@@ -203,10 +202,10 @@ export const checkForBanter = (msg: Discord.Message, channel, client, debugChann
         runAndReport(
             () => {
                 const response = [
-                    'https://i.pinimg.com/originals/e9/f7/25/e9f72559d7ffa79df54f0273977221aa.gif',
-                    'https://gifs.gifburger.com/157-sergio-ramos-penalty-miss-vs-bayern-munich-2012-hd.gif',
-                    'https://www.whoateallthepies.tv/wp-content/uploads/2012/04/Ramos.gif',
-                    'https://external-content.duckduckgo.com/iu/?u=http%3A%2F%2F25.media.tumblr.com%2Ftumblr_mc9u38nMBm1qdlh1io1_r1_400.gif&f=1&nofb=1',
+                    'https://sleeperop.com/gifs/ramos/ramos-1.gif',
+                    'https://sleeperop.com/gifs/ramos/ramos-2.gif',
+                    'https://sleeperop.com/gifs/ramos/ramos-3.gif',
+                    'https://sleeperop.com/gifs/ramos/ramos-4.gif',
                 ];
                 const luckyNumber = Math.floor(Math.random() * response.length);
                 channel.send(response[luckyNumber]);
@@ -217,9 +216,7 @@ export const checkForBanter = (msg: Discord.Message, channel, client, debugChann
     } else if (messageIncludes('!jebaited')) {
         runAndReport(
             () => {
-                const response = [
-                    'https://tenor.com/view/immobile-football-euro2020-edmw-hao-le-hao-le-gif-22197371',
-                ];
+                const response = ['https://sleeperop.com/gifs/jebaited.gif'];
                 const luckyNumber = Math.floor(Math.random() * response.length);
                 channel.send(response[luckyNumber]);
             },
@@ -366,13 +363,13 @@ export const checkForBanter = (msg: Discord.Message, channel, client, debugChann
         );
     } else if (messageIncludes('!halamadrid')) {
         runAndReport(
-            () => channel.send('https://streamable.com/ppeht'),
+            () => channel.send('https://sleeperop.com/gifs/halamadrid.mp4'),
             debugChannel,
             '!halamadrid'
         );
     } else if (messageIncludes('!mesqueunclub') || messageIncludes('!barca')) {
         runAndReport(
-            () => channel.send('https://streamable.com/6cebwi'),
+            () => channel.send('https://sleeperop.com/gifs/barca.mp4'),
             debugChannel,
             '!mesqueunclub'
         );
@@ -762,7 +759,7 @@ export const checkForBanter = (msg: Discord.Message, channel, client, debugChann
     } else if (messageIncludes('!wideramos')) {
         runAndReport(
             () => {
-                const response = ['https://sleeperop.com/gifs/wideramos.gif'];
+                const response = ['https://sleeperop.com/gifs/ramos/wideramos.gif'];
                 const luckyNumber = Math.floor(Math.random() * response.length);
                 channel.send(response[luckyNumber]);
             },
