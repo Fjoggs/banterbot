@@ -25,16 +25,16 @@ let debugChannel: Discord.Channel | undefined;
 let mute = true;
 let currentYear = 2024;
 
-const preikGuildId = '110121552934100992';
-const fjoggsGeneralGuildId = '774731038391140375';
-const debugGuildId = '1004475950349693039';
+const preikChannelId = '110121552934100992';
+const fjoggsGeneralChannelId = '774731038391140375';
+const debugChannelId = '1004475950349693039';
 let liveData = {};
 
 client.once('ready', () => {
     console.log(`Logged in as ${client?.user?.tag}!`);
-    channel = client.channels.cache.get(preikGuildId); //preik
-    testChannel = client.channels.cache.get(fjoggsGeneralGuildId); // fjoggs' general
-    debugChannel = client.channels.cache.get(debugGuildId); // botjævlan
+    channel = client.channels.cache.get(preikChannelId); //preik
+    testChannel = client.channels.cache.get(fjoggsGeneralChannelId); // fjoggs' general
+    debugChannel = client.channels.cache.get(debugChannelId); // botjævlan
 
     runAndReport(
         async () => {
@@ -67,6 +67,8 @@ client.on('messageReactionAdd', async (reaction) => {
 client.on('messageCreate', async (message) => {
     const messageIsEqual = (phrase: string) => message.content.toLowerCase() === phrase;
     const messageIncludes = (phrase: string) => message.content.toLowerCase().includes(phrase);
+    const channelMessageCameFrom = client.channels.cache.get(message.channelId);
+    console.log('channel', channelMessageCameFrom);
 
     const isBot = message.author.username === 'BanterBOT';
     const emojiRegex = new RegExp('(:\\w*:)', 'gm');
@@ -116,7 +118,7 @@ client.on('messageCreate', async (message) => {
         //@ts-ignore
         debugChannel.send(`FPL-gw: ${getCurrentGameweek()}`);
     }
-    checkForBanter(message, channel, client, debugChannel);
+    checkForBanter(message, channelMessageCameFrom, client, debugChannel);
     checkForProfeten(message, channel, debugChannel);
     checkForUtil(message, testChannel, debugChannel);
 });
