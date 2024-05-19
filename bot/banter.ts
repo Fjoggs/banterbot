@@ -25,7 +25,6 @@ interface RaceTime {
 
 let hypeCounter = 0;
 let previousDate = new Date();
-const gressRegex = /^!gress&/;
 
 export const checkForBanter = (msg: Discord.Message, channel, client, debugChannel) => {
     const messageIncludes = (phrase: string) => msg.content.toLowerCase().includes(phrase);
