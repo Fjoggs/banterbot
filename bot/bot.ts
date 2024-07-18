@@ -8,6 +8,7 @@ import { Intents } from 'discord.js';
 import { env } from '../app-env';
 import { checkForProfeten } from './profeten';
 import { checkForUtil, runAndReport } from './util';
+import { checkForShopping } from './shopping';
 
 const client = new Discord.Client({
   intents: [
@@ -123,6 +124,9 @@ client.on('messageCreate', async (message) => {
   checkForBanter(message, channelMessageCameFrom, client, debugChannel);
   checkForProfeten(message, channel, channelMessageCameFrom);
   checkForUtil(message, testChannel, debugChannel);
+  if (!isBot) {
+    checkForShopping(message, channelMessageCameFrom, debugChannel);
+  }
 });
 
 setInterval(() => {
