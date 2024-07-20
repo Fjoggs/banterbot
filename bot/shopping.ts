@@ -38,14 +38,14 @@ export const checkForShopping = (msg: Discord.Message, channel, debugChannel) =>
         let shoppingId: number;
         let message = '';
         shoppingLists.forEach((shoppingList) => {
-          console.log('Shopping list', shoppingList);
-          message += `\n liste id: ${shoppingList.shoppingId})\n------\n`;
-          shoppingId = shoppingList.shoppingId;
-          console.log(shoppingList.items);
-          const items = shoppingList.items.split(',');
-          items.forEach((item) => {
-            message += `${item.trim()}\n`;
-          });
+          if (!shoppingList.completed) {
+            message += `\n liste id: ${shoppingList.shoppingId})\n------\n`;
+            shoppingId = shoppingList.shoppingId;
+            const items = shoppingList.items.split(',');
+            items.forEach((item) => {
+              message += `${item.trim()}\n`;
+            });
+          }
         });
         if (message) {
           channel.send(message, { code: true });
