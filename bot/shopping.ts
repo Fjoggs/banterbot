@@ -41,6 +41,7 @@ export const checkForShopping = (msg: Discord.Message, channel, debugChannel) =>
           if (!shoppingList.completed) {
             message += `\n liste id: ${shoppingList.shoppingId})\n------\n`;
             shoppingId = shoppingList.shoppingId;
+            console.log(shoppingList.items);
             const items = shoppingList.items.split(',');
             items.forEach((item) => {
               message += `${item.trim()}\n`;
