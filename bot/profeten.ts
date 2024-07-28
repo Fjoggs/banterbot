@@ -27,7 +27,7 @@ import {
   addLeague,
   deleteLeague,
 } from '../api/db/leagues';
-import { changePlayerTotalRep, getPlayers, Player } from '../api/db/players';
+import { changePlayerTotalRep, getPlayers, getStats, Player, Stats } from '../api/db/players';
 
 let currentChallengeId;
 
@@ -363,15 +363,22 @@ export const checkForProfeten = (msg: Discord.Message, channel, debugChannel) =>
     }
   } else if (messageStartsWith('!rep')) {
     if (messageIsEqual('!rep')) {
-      getPlayers((players: Array<Player>) => {
-        let message = 'Total rep:\n';
-        players.forEach((player) => {
-          if (player.rep > 0) {
-            message += `${playersIdsToName[player.playerId]}:  ${player.rep} rep\n`;
-          }
+      getStats((stats: Array<Stats>) => {
+        let message = 'Kis | Score | +rep | -rep\n';
+        stats.forEach((stat) => {
+          message += `${stat.name} ${stat.rep} ${stat.}`
+          channel.send(message, { code: true });
         });
-        debugChannel.send(message, { code: true });
-      });
+      })
+      // getPlayers((players: Array<Player>) => {
+      //   let message = 'Total rep:\n';
+      //   players.forEach((player) => {
+      //     if (player.rep > 0) {
+      //       message += `${playersIdsToName[player.playerId]}:  ${player.rep} rep\n`;
+      //     }
+      //   });
+      //   debugChannel.send(message, { code: true });
+      // });
     } else {
       const leagueIdString = msg.content.toLowerCase().replace('!rep', '').trim();
       if (leagueIdString.length > 0) {
