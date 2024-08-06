@@ -3,7 +3,10 @@ import { sqlite3 } from 'sqlite3';
 export interface Reminder {
   id: number;
   message: string;
-  when: Date;
+  who: string;
+  time: number;
+  reminded: boolean;
+  inProgress: boolean;
 }
 
 const sqlite3: sqlite3 = require('sqlite3').verbose();
@@ -12,7 +15,7 @@ export const initDb = () => {
   let db = new sqlite3.Database('./banterbot-database.db');
   db.serialize(() => {
     db.all(
-      'CREATE TABLE IF NOT EXISTS reminder ( INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, message TEXT, who TEXT, when TEXT)',
+      'CREATE TABLE IF NOT EXISTS reminder (id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, message TEXT, who TEXT, time TEXT, reminded BOOLEAN, inProgress BOOLEAN)',
       [],
       (error) => {
         if (error) {
@@ -24,25 +27,36 @@ export const initDb = () => {
   db.close();
 };
 
-export const getReminder = (callback: Function) => {
+export const getReminders = (callback: Function) => {
   let db = new sqlite3.Database('./banterbot-database.db');
   db.serialize(() => {
-    db.all(
-      'SELECT reminder, items, completed FROM reminder',
-      [],
-      (error, rows: Array<Reminder>) => {
-        if (error) {
-          console.log('Something went wrong: ', error);
-        } else {
-          callback(rows);
-        }
+    db.all('SELECT * FROM reminder', [], (error, rows: Array<Reminder>) => {
+      if (error) {
+        console.log('Something went wrong: ', error);
+      } else {
+        callback(rows);
       }
-    );
+    });
   });
   db.close();
 };
 
-export const getReminderBy = (id: number, callback: Function) => {
+export const getFutureReminders = (callback: Function) => {
+  const now = Date.now();
+  let db = new sqlite3.Database('./banterbot-database.db');
+  db.serialize(() => {
+    db.all('SELECT * FROM reminder WHERE time > ?', [now], (error, rows: Array<Reminder>) => {
+      if (error) {
+        console.log('Something went wrong: ', error);
+      } else {
+        callback(rows);
+      }
+    });
+  });
+  db.close();
+};
+
+export const getReminderById = (id: number, callback: Function) => {
   let db = new sqlite3.Database('./banterbot-database.db');
   db.serialize(() => {
     db.get('SELECT * from reminder WHERE reminder = ?', [id], (error, row: Reminder) => {
@@ -56,19 +70,19 @@ export const getReminderBy = (id: number, callback: Function) => {
   db.close();
 };
 
-export const addReminder = (reminderList: string[], callback: Function) => {
+export const addReminder = (message: string, who: string, when: Date, callback: Function) => {
   let db = new sqlite3.Database('./banterbot-database.db');
   db.serialize(() => {
-    console.log(`Inserting reminder list into db`);
+    console.log(`Inserting reminder ${message}, ${who}, ${when} into db`);
     db.run(
-      'INSERT INTO reminder (items, completed) VALUES(?, ?)',
-      [reminderList, false],
+      'INSERT INTO reminder (message, who, time, reminded, inProgress) VALUES(?, ?, ?, ?, ?)',
+      [message, who, when, false, false],
       function (error) {
         if (error) {
           console.log('Something went wrong: ', error);
         } else {
-          console.log('Inserted shoping list : ', this.lastID);
-          callback(this.lastID, reminderList);
+          console.log('Inserted reminder: ', this.lastID);
+          callback();
         }
       }
     );
@@ -79,11 +93,26 @@ export const addReminder = (reminderList: string[], callback: Function) => {
 export const undoneReminder = (id: number, callback: Function) => {
   let db = new sqlite3.Database('./banterbot-database.db');
   db.serialize(() => {
-    db.get('UPDATE reminder SET completed = false where id = ?', [id], (error, row: Reminder) => {
+    db.get('UPDATE reminder SET reminded = false where id = ?', [id], (error, _) => {
       if (error) {
         console.log('Something went wrong: ', error);
       } else {
-        console.log('Opened reminder list', id);
+        console.log('Sat reminded = false for  reminder with id', id);
+        callback();
+      }
+    });
+  });
+  db.close();
+};
+
+export const completeReminder = (id: number, callback: Function) => {
+  let db = new sqlite3.Database('./banterbot-database.db');
+  db.serialize(() => {
+    db.get('UPDATE reminder SET reminded = true where id = ?', [id], (error, _) => {
+      if (error) {
+        console.log('Something went wrong: ', error);
+      } else {
+        console.log('Completed reminder', id);
         callback();
       }
     });

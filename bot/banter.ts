@@ -57,7 +57,7 @@ export const checkForBanter = (msg: Discord.Message, channel, client, debugChann
   } else if (messageIncludes('!var')) {
     runAndReport(
       () => {
-        const response = ['offside', 'onside', 'dive', 'gåll', 'felling'];
+        const response = ['offside', 'onside', 'dive', 'gåll', 'felling', 'fekting'];
         const luckyNumber = Math.floor(Math.random() * response.length);
         channel.send(`Soleklar ${response[luckyNumber]}`);
       },
@@ -188,6 +188,7 @@ export const checkForBanter = (msg: Discord.Message, channel, client, debugChann
           'https://sleeperop.com/gifs/pog/pog-1.gif',
           'https://sleeperop.com/gifs/pog/pog-2.gif',
           'https://sleeperop.com/gifs/pog/pog-3.gif',
+          'https://sleeperop.com/gifs/pog/pog-4.gif',
         ];
         const luckyNumber = Math.floor(Math.random() * response.length);
         channel.send(response[luckyNumber]);

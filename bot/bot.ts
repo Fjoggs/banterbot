@@ -9,6 +9,7 @@ import { env } from '../app-env';
 import { checkForProfeten } from './profeten';
 import { checkForUtil, runAndReport } from './util';
 import { checkForShopping } from './shopping';
+import { checkForReminders, checkForRemindMe } from './remindme';
 
 const client = new Discord.Client({
   intents: [
@@ -48,6 +49,8 @@ client.once('ready', () => {
     debugChannel,
     'Fetch draft data on startup'
   );
+
+  checkForReminders(client);
 });
 
 client.login(env.TOKEN);
@@ -121,11 +124,12 @@ client.on('messageCreate', async (message) => {
     //@ts-ignore
     debugChannel.send(`FPL-gw: ${getCurrentGameweek()}`);
   }
-  checkForBanter(message, channelMessageCameFrom, client, debugChannel);
-  checkForProfeten(message, channel, channelMessageCameFrom);
-  checkForUtil(message, testChannel, debugChannel);
   if (!isBot) {
+    checkForBanter(message, channelMessageCameFrom, client, debugChannel);
+    checkForProfeten(message, channel, channelMessageCameFrom);
+    checkForUtil(message, testChannel, debugChannel);
     checkForShopping(message, channelMessageCameFrom, debugChannel);
+    checkForRemindMe(message, channelMessageCameFrom, debugChannel, client);
   }
 });
 
