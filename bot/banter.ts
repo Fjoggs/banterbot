@@ -28,21 +28,8 @@ let previousDate = new Date();
 
 export const checkForBanter = (msg: Discord.Message, channel, client, debugChannel) => {
   const messageIncludes = (phrase: string) => msg.content.toLowerCase().includes(phrase);
-  if (messageIncludes('!rittard')) {
-    runAndReport(() => channel.send(rittardOfTheWeek()), debugChannel, '!rittard');
-  } else if (messageIncludes('!ban')) {
+  if (messageIncludes('!ban')) {
     runAndReport(() => channel.send('Banning Molbs'), debugChannel, '!ban');
-  } else if (messageIncludes('!topdick')) {
-    runAndReport(
-      () => {
-        const emoji = client.emojis.cache.find((emoji) => emoji.name === 'ez');
-        channel.send(`${topDickOfTheWeek()} ${emoji.toString()}`);
-      },
-      debugChannel,
-      '!ban'
-    );
-  } else if (messageIncludes('!luckernoob')) {
-    runAndReport(() => channel.send(luckernoobOfTheWeek()), debugChannel, '!luckernoob');
   } else if (messageIncludes('!pope')) {
     runAndReport(() => channel.send(channel.send('Fuck Pope')), debugChannel, '!pope');
   } else if (messageIncludes('!baitley')) {
@@ -162,6 +149,15 @@ export const checkForBanter = (msg: Discord.Message, channel, client, debugChann
       },
       debugChannel,
       '!semb'
+    );
+  } else if (messageIncludes('!langli')) {
+    runAndReport(
+      () => {
+        const emoji = client.emojis.cache.find((emoji) => emoji.name === 'mega');
+        channel.send(':mega:');
+      },
+      debugChannel,
+      '!langli'
     );
   } else if (messageIncludes('!jose')) {
     runAndReport(

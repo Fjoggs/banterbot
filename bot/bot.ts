@@ -10,6 +10,7 @@ import { checkForProfeten } from './profeten';
 import { checkForUtil, runAndReport } from './util';
 import { checkForShopping } from './shopping';
 import { checkForReminders, checkForRemindMe } from './remindme';
+import { checkForDraft } from './draft';
 
 const client = new Discord.Client({
   intents: [
@@ -130,6 +131,7 @@ client.on('messageCreate', async (message) => {
     checkForUtil(message, testChannel, debugChannel);
     checkForShopping(message, channelMessageCameFrom, debugChannel);
     checkForRemindMe(message, channelMessageCameFrom, debugChannel, client);
+    checkForDraft(message, channelMessageCameFrom, debugChannel, client);
   }
 });
 

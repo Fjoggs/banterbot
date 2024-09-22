@@ -19,6 +19,7 @@ let state: GameState = {
   messages: [],
 };
 
+const leagueCode = 22160;
 const apiUrl = 'https://draft.premierleague.com/api';
 
 export const updateGameweek = async (debugChannel) => {
@@ -95,7 +96,7 @@ const getLeagueInfo = async (debugChannel) => {
   let fantasyTeams: Array<FantasyTeam> = [];
   try {
     // const response = await fetch(`${apiUrl}/league/81059/details`);
-    const response = await fetch(`${apiUrl}/league/70092/details`);
+    const response = await fetch(`${apiUrl}/league/${leagueCode}/details`);
     const leagueDetails: LeagueDetails = (await response.json()) as LeagueDetails;
     leagueDetails.league_entries.forEach((fantasyTeam) => {
       fantasyTeams.push({
