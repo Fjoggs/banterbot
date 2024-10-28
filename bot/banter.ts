@@ -221,21 +221,21 @@ export const checkForBanter = (msg: Discord.Message, channel, client, debugChann
     runAndReport(
       () => {
         const manager = 'Ten Hag';
-        const response = [
-          `Just looking at ${manager}'s wild ride makes me sick`,
-          `${manager}'s wild ride looks too intense for me`,
-          `${manager}'s wild ride is really good value!`,
-          `${manager}'s wild ride was great!`,
-          `I'm not getting on ${manager}'s wild ride when it is raining.`,
-          `I want to go on something more thrilling than ${manager}'s wild ride`,
-          `I'm not paying that much to get on ${manager}'s wild ride`,
-          `I want to get off ${manager}'s wild ride`,
-          `I've been queuing for ${manager}'s wild ride for ages`,
-        ];
-        const luckyNumber = Math.floor(Math.random() * response.length);
-        channel.send(response[luckyNumber]);
-        // const emoji = client.emojis.cache.find((emoji) => emoji.name === 'feelsbadman');
-        // channel.send(`Ole's wild ride has crashed ${emoji.toString()}`);
+        // const response = [
+        //   `Just looking at ${manager}'s wild ride makes me sick`,
+        //   `${manager}'s wild ride looks too intense for me`,
+        //   `${manager}'s wild ride is really good value!`,
+        //   `${manager}'s wild ride was great!`,
+        //   `I'm not getting on ${manager}'s wild ride when it is raining.`,
+        //   `I want to go on something more thrilling than ${manager}'s wild ride`,
+        //   `I'm not paying that much to get on ${manager}'s wild ride`,
+        //   `I want to get off ${manager}'s wild ride`,
+        //   `I've been queuing for ${manager}'s wild ride for ages`,
+        // ];
+        // const luckyNumber = Math.floor(Math.random() * response.length);
+        // channel.send(response[luckyNumber]);
+        const emoji = client.emojis.cache.find((emoji) => emoji.name === 'feelsbadman');
+        channel.send(`${manager}'s wild ride has crashed ${emoji.toString()}`);
       },
       debugChannel,
       '!wildride'
