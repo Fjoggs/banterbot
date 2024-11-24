@@ -62,7 +62,7 @@ export const checkForDraft = (msg: Discord.Message, channel, debugChannel, clien
     runAndReport(
       async () => {
         const yepscience = client.emojis.cache.find((emoji) => emoji.name === 'yepscience');
-        channel.send(`Dypdykker i draften for å finne ukas rittard ${yepscience.toString()}`);
+        channel.send(`Dypdykker i draften for å finne ukas topdick ${yepscience.toString()}`);
         const emoji = client.emojis.cache.find((emoji) => emoji.name === 'ez');
         let currentTopDick = '';
         let currentScore = 0;

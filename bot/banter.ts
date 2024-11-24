@@ -220,7 +220,7 @@ export const checkForBanter = (msg: Discord.Message, channel, client, debugChann
   } else if (messageIncludes('!wildride')) {
     runAndReport(
       () => {
-        const manager = 'Ten Hag';
+        const manager = 'Amorim';
         // const response = [
         //   `Just looking at ${manager}'s wild ride makes me sick`,
         //   `${manager}'s wild ride looks too intense for me`,
@@ -230,12 +230,14 @@ export const checkForBanter = (msg: Discord.Message, channel, client, debugChann
         //   `I want to go on something more thrilling than ${manager}'s wild ride`,
         //   `I'm not paying that much to get on ${manager}'s wild ride`,
         //   `I want to get off ${manager}'s wild ride`,
-        //   `I've been queuing for ${manager}'s wild ride for ages`,
         // ];
         // const luckyNumber = Math.floor(Math.random() * response.length);
         // channel.send(response[luckyNumber]);
-        const emoji = client.emojis.cache.find((emoji) => emoji.name === 'feelsbadman');
-        channel.send(`${manager}'s wild ride has crashed ${emoji.toString()}`);
+        // const emoji = client.emojis.cache.find((emoji) => emoji.name === 'feelsbadman');
+        // channel.send(`${manager}'s wild ride has crashed ${emoji.toString()}`);
+        //
+        const emoji = client.emojis.cache.find((emoji) => emoji.name === 'pausechamp');
+        channel.send(`I've been queuing for ${manager}'s wild ride for ages ${emoji.toString()}`);
       },
       debugChannel,
       '!wildride'
