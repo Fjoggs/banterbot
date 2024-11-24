@@ -236,7 +236,7 @@ export const checkForBanter = (msg: Discord.Message, channel, client, debugChann
         // const emoji = client.emojis.cache.find((emoji) => emoji.name === 'feelsbadman');
         // channel.send(`${manager}'s wild ride has crashed ${emoji.toString()}`);
         //
-        const emoji = client.emojis.cache.find((emoji) => emoji.name === 'pausechamp');
+        const emoji = client.emojis.cache.find((emoji) => emoji.name === 'PauseChamp');
         channel.send(`I've been queuing for ${manager}'s wild ride for ages ${emoji.toString()}`);
       },
       debugChannel,
