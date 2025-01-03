@@ -26,7 +26,7 @@ let channel: Discord.Channel | undefined;
 let testChannel: Discord.Channel | undefined;
 let debugChannel: Discord.Channel | undefined;
 let mute = true;
-let currentYear = 2024;
+let currentYear = 2025;
 
 const preikChannelId = '110121552934100992';
 const fjoggsGeneralChannelId = '774731038391140375';
@@ -142,7 +142,7 @@ setInterval(() => {
   // const messages = getMessages(events);
   if (isNewYear()) {
     //@ts-ignore
-    channel.send('https://www.youtube.com/watch?v=on1Arneo-jc');
+    channel.send('https://www.youtube.com/watch?v=WJsIDnrZvVc');
   }
 
   // messages.forEach((message) => {
