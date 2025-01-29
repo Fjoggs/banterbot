@@ -207,6 +207,16 @@ export const checkForBanter = (msg: Discord.Message, channel, client, debugChann
       debugChannel,
       '!ramos'
     );
+  } else if (messageIncludes('!watkins')) {
+    runAndReport(
+      () => {
+        const response = ['https://sleeperop.com/gifs/watkins.mp4'];
+        const luckyNumber = Math.floor(Math.random() * response.length);
+        channel.send(response[luckyNumber]);
+      },
+      debugChannel,
+      '!ramos'
+    );
   } else if (messageIncludes('!jebaited')) {
     runAndReport(
       () => {
