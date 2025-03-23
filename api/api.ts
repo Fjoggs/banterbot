@@ -38,25 +38,29 @@ export const getGraphData = async (): Promise<string[]> => {
   let stats = [];
   try {
     const teams = await getLeagueInfo({});
+    console.log('teams', teams);
+
     stats = await Promise.all(
       teams.map(async (fantasyTeam) => {
-        const team = {
-          name: fantasyTeam.name,
-          id: fantasyTeam.id,
-          scores: [],
-        };
-        const response = await fetch(`${apiUrl}/entry/${fantasyTeam.id}/history`);
-        const historyJson = await response.json();
-        historyJson.history.forEach(
-          (history: { event: number; points: number; total_points: number }) => {
-            team.scores.push({
-              week: history.event,
-              points: history.points,
-              totalPoints: history.total_points,
-            });
-          }
-        );
-        return team;
+        if (fantasyTeam.id !== null) {
+          const team = {
+            name: fantasyTeam.name,
+            id: fantasyTeam.id,
+            scores: [],
+          };
+          const response = await fetch(`${apiUrl}/entry/${fantasyTeam.id}/history`);
+          const historyJson = await response.json();
+          historyJson.history.forEach(
+            (history: { event: number; points: number; total_points: number }) => {
+              team.scores.push({
+                week: history.event,
+                points: history.points,
+                totalPoints: history.total_points,
+              });
+            }
+          );
+          return team;
+        }
       })
     );
   } catch (error) {
@@ -123,7 +127,7 @@ const getGWStatsForTeam = async (fantasyTeam: FantasyTeam, debugChannel) => {
       gameweekScore(fantasyTeam, debugChannel);
     });
   } catch (error) {
-    debugChannel.send(`getLeagueInfo failed with error: ${error}`);
+    // debugChannel.send(`getLeagueInfo failed with error: ${error}`);
   }
 };
 

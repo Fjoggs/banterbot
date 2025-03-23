@@ -8,7 +8,6 @@ import {
   increaseLukakuCounter,
   RandomEntry,
 } from '../api/db/general';
-import { rittardOfTheWeek, topDickOfTheWeek, luckernoobOfTheWeek } from '../api/parser';
 import { runAndReport } from './util';
 
 const jsdom = require('jsdom');
@@ -28,6 +27,7 @@ let previousDate = new Date();
 
 export const checkForBanter = (msg: Discord.Message, channel, client, debugChannel) => {
   const messageIncludes = (phrase: string) => msg.content.toLowerCase().includes(phrase);
+  const messageIsEqual = (phrase: string) => msg.content.toLowerCase() === phrase;
   if (messageIncludes('!ban')) {
     runAndReport(() => channel.send('Banning Molbs'), debugChannel, '!ban');
   } else if (messageIncludes('!pope')) {
@@ -51,6 +51,10 @@ export const checkForBanter = (msg: Discord.Message, channel, client, debugChann
       debugChannel,
       '!var'
     );
+  } else if (messageIncludes('!el') || messageIncludes('!canyoubelieveit')) {
+    channel.send('https://www.youtube.com/watch?v=ny2aJpD9F4A');
+  } else if (messageIncludes('!el') || messageIncludes('!canyoubelieveit')) {
+    channel.send('https://www.youtube.com/watch?v=ny2aJpD9F4A');
   } else if (messageIncludes('!toto')) {
     channel.send('https://sleeperop.com/gifs/totorage.gif');
   } else if (messageIncludes('!fia')) {
@@ -58,25 +62,25 @@ export const checkForBanter = (msg: Discord.Message, channel, client, debugChann
       () => {
         const drivers = [
           'Max',
-          'Hamilton',
-          'Bottas',
-          'Perez',
+          'Lawson',
           'Norris',
+          'Piastri',
           'Leclerc',
-          'Sainz',
-          'Ricciardo',
-          'Gasly',
+          'Hamilton',
+          'Russell',
+          'Antonelli',
           'Alonso',
-          'Ocon',
-          'Magnussen',
           'Stroll',
           'Tsunoda',
-          'Russell',
-          'Piastri',
+          'Hadjar',
+          'Ocon',
+          'Bearman',
+          'Gasly',
+          'Doohan',
           'Albon',
-          'Sargeant',
-          'Zhou',
+          'Sainz',
           'Hulkenberg',
+          'Bortoleto',
         ];
         const randomDriver = Math.floor(Math.random() * drivers.length);
         const response = [
@@ -131,6 +135,41 @@ export const checkForBanter = (msg: Discord.Message, channel, client, debugChann
       debugChannel,
       '!molbs'
     );
+  } else if (messageIncludes('!garnacho')) {
+    runAndReport(
+      () => {
+        let response = [];
+        if (messageIncludes('!garnacho pls')) {
+          response = [
+            'https://sleeperop.com/garnacho/garnacho2.mp4', // 1 is cached as the debruyne clip
+            'https://sleeperop.com/garnacho/garnacho3.mp4',
+          ];
+        } else {
+          response = [
+            'https://sleeperop.com/garnacho/2ny1.mp4',
+            'https://sleeperop.com/garnacho/bournemouth1.mp4',
+            'https://sleeperop.com/garnacho/bournemouth2.mp4',
+            'https://sleeperop.com/garnacho/carew1.mp4',
+            'https://sleeperop.com/garnacho/debruyne1.mp4',
+            'https://sleeperop.com/garnacho/debruyne2.mp4',
+            'https://sleeperop.com/garnacho/ebou_adams1.mp4',
+            'https://sleeperop.com/garnacho/garnacho2.mp4',
+            'https://sleeperop.com/garnacho/garnacho3.mp4',
+            'https://sleeperop.com/garnacho/geoff_thomas1.mp4',
+            'https://sleeperop.com/garnacho/heskey1.mp4',
+            'https://sleeperop.com/garnacho/mls1.mp4',
+            'https://sleeperop.com/garnacho/mudryk1.mp4',
+            'https://sleeperop.com/garnacho/nunez1.mp4',
+            'https://sleeperop.com/garnacho/qatar1.mp4',
+            'https://sleeperop.com/garnacho/torres1.mp4',
+          ];
+        }
+        const luckyNumber = Math.floor(Math.random() * response.length);
+        channel.send(response[luckyNumber]);
+      },
+      debugChannel,
+      '!garnacho'
+    );
   } else if (messageIncludes('!semb')) {
     runAndReport(
       () => {
@@ -142,6 +181,7 @@ export const checkForBanter = (msg: Discord.Message, channel, client, debugChann
           'Ballwatching',
           'Det er et bra løp, men han er i offside',
           'Ryan Sterling',
+          'Jayden Pickford',
           'De lukter høler',
         ];
         const luckyNumber = Math.floor(Math.random() * response.length);
@@ -153,7 +193,6 @@ export const checkForBanter = (msg: Discord.Message, channel, client, debugChann
   } else if (messageIncludes('!langli')) {
     runAndReport(
       () => {
-        const emoji = client.emojis.cache.find((emoji) => emoji.name === 'mega');
         channel.send(':mega:');
       },
       debugChannel,
@@ -220,7 +259,20 @@ export const checkForBanter = (msg: Discord.Message, channel, client, debugChann
   } else if (messageIncludes('!jebaited')) {
     runAndReport(
       () => {
-        const response = ['https://sleeperop.com/gifs/jebaited.gif'];
+        const response = [
+          'https://sleeperop.com/gifs/jebaited/jebaited1.gif',
+          'https://sleeperop.com/gifs/jebaited/jebaited2.gif',
+        ];
+        const luckyNumber = Math.floor(Math.random() * response.length);
+        channel.send(response[luckyNumber]);
+      },
+      debugChannel,
+      '!jebaited'
+    );
+  } else if (messageIncludes('!throw')) {
+    runAndReport(
+      () => {
+        const response = ['https://sleeperop.com/gifs/throw/throw1.gif'];
         const luckyNumber = Math.floor(Math.random() * response.length);
         channel.send(response[luckyNumber]);
       },
@@ -499,24 +551,28 @@ export const checkForBanter = (msg: Discord.Message, channel, client, debugChann
   } else if (messageIncludes('!racetime')) {
     runAndReport(
       () => {
+        interface RaceData {
+          date: string;
+          time: string;
+          round: number;
+          raceName: string;
+          Circuit: Object;
+          FirstPractice?: RaceTime;
+          SecondPractice?: RaceTime;
+          ThirdPractice?: RaceTime;
+          Qualifying?: RaceTime;
+          Sprint?: RaceTime;
+        }
         const currentDate = new Date();
         const currentYear = currentDate.getFullYear();
-        let nextRace;
-        fetch(`https://ergast.com/api/f1/${currentYear}.json`)
+        let nextRace: RaceData;
+        fetch(`https://api.jolpi.ca/ergast/f1/${currentYear}/`)
           .then((response) =>
             response.json().then(
               (data: {
                 MRData: {
                   RaceTable: {
-                    Races: Array<{
-                      date: string;
-                      time: string;
-                      FirstPractice?: RaceTime;
-                      SecondPractice?: RaceTime;
-                      ThirdPractice?: RaceTime;
-                      Qualifying?: RaceTime;
-                      Sprint?: RaceTime;
-                    }>;
+                    Races: Array<RaceData>;
                   };
                 };
               }) => {
@@ -540,9 +596,9 @@ export const checkForBanter = (msg: Discord.Message, channel, client, debugChann
                     const formattedTime = raceDate.toLocaleTimeString('no-NO', {
                       hour12: false,
                     });
-                    let message = `**Hva**: ${nextRace.raceName}, **Hvor**: ${nextRace.Circuit.circuitName}, **Når**: ${formattedDate}\n`;
+                    let message = `**Hva**: ${nextRace.raceName}, **Runde**: ${nextRace.round}, **Når**: ${formattedDate}\n`;
                     if (hasTime) {
-                      message = `**Hva**: ${nextRace.raceName}, **Hvor**: ${nextRace.Circuit.circuitName}, **Når**: ${formattedDate}, ${formattedTime}\n`;
+                      message = `**Hva**: ${nextRace.raceName}, **Runde**: ${nextRace.round}, **Når**: ${formattedDate}, ${formattedTime}\n`;
                     }
                     let multiLine = false;
                     if (race.Sprint) {
@@ -633,9 +689,9 @@ export const checkForBanter = (msg: Discord.Message, channel, client, debugChann
     runAndReport(
       () => {
         const currentDate = new Date();
-        let lanDate = new Date('2025-07-25');
-        const endOfLan = new Date('2025-08-03');
-        const nextLanDate = new Date('2025-01-19');
+        let lanDate = new Date('2025-07-18');
+        const endOfLan = new Date('2025-07-27');
+        const nextLanDate = new Date('2026-07-27');
 
         const daysUntilLan = Math.ceil(
           (lanDate.getTime() - currentDate.getTime()) / 1000 / 60 / 60 / 24
@@ -740,6 +796,17 @@ export const checkForBanter = (msg: Discord.Message, channel, client, debugChann
       },
       debugChannel,
       '!pila'
+    );
+  } else if (messageIncludes('!fairway')) {
+    runAndReport(
+      () => {
+        const min = Math.ceil(0);
+        const max = Math.floor(400);
+        const distance = Math.floor(Math.random() * (max - min) + min);
+        channel.send(`${distance} meter unna fairway`);
+      },
+      debugChannel,
+      '!fairway'
     );
   } else if (messageIncludes('!wideramos')) {
     runAndReport(
