@@ -51,7 +51,7 @@ client.once('ready', () => {
     'Fetch draft data on startup'
   );
 
-  checkForReminders(client);
+  // checkForReminders(client);
 });
 
 client.login(env.TOKEN);
@@ -137,7 +137,7 @@ client.on('messageCreate', async (message) => {
 
 setInterval(() => {
   console.log('polling for messages');
-  updateGameweek(debugChannel);
+  // updateGameweek(debugChannel);
   // const events = checkForEvents(liveData);
   // const messages = getMessages(events);
   if (isNewYear()) {

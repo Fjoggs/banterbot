@@ -18,5 +18,5 @@
 #===============================================================================
 
 set -o nounset                              # Treat unset variables as an error
-rsync -av --exclude 'banterbot-database.db' ~/projects/banterbot/ fjoggs@anno1337.com:~/banterbot
+rsync -av --exclude 'banterbot-database.db' --exclude 'node_modules/' ~/projects/banterbot/ fjoggs@anno1337.com:~/banterbot
 

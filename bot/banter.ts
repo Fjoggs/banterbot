@@ -689,9 +689,9 @@ export const checkForBanter = (msg: Discord.Message, channel, client, debugChann
     runAndReport(
       () => {
         const currentDate = new Date();
-        let lanDate = new Date('2025-07-18');
-        const endOfLan = new Date('2025-07-27');
-        const nextLanDate = new Date('2026-07-27');
+        let lanDate = new Date('2026-07-19');
+        const endOfLan = new Date('2026-07-26');
+        const nextLanDate = new Date('2027-07-23');
 
         const daysUntilLan = Math.ceil(
           (lanDate.getTime() - currentDate.getTime()) / 1000 / 60 / 60 / 24
