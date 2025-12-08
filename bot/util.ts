@@ -65,6 +65,7 @@ export const checkForUtil = (msg: Discord.Message, channel, debugChannel) => {
 
 export const runAndReport = (func: Function, debugChannel, command: string) => {
   try {
+    console.log('running func', func.name);
     func();
   } catch (error) {
     console.log('hello?', error);

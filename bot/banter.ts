@@ -117,6 +117,9 @@ export const checkForBanter = (msg: Discord.Message, channel, client, debugChann
           'Martinelli',
           'White',
           'Ødegaard',
+          'Gyökeres',
+          'Zubimendi',
+          'Nørgaard',
         ];
         const randomArsenalPlayer = Math.floor(Math.random() * essentialArsenalPlayers.length);
         const emoji = client.emojis.cache.find((emoji) => emoji.name === 'pepoFinger');
@@ -292,6 +295,31 @@ export const checkForBanter = (msg: Discord.Message, channel, client, debugChann
           `I want to go on something more thrilling than ${manager}'s wild ride`,
           `I'm not paying that much to get on ${manager}'s wild ride`,
           `I want to get off ${manager}'s wild ride`,
+        ];
+        const luckyNumber = Math.floor(Math.random() * response.length);
+        channel.send(response[luckyNumber]);
+        // const emoji = client.emojis.cache.find((emoji) => emoji.name === 'feelsbadman');
+        // channel.send(`${manager}'s wild ride has crashed ${emoji.toString()}`);
+        //
+        // const emoji = client.emojis.cache.find((emoji) => emoji.name === 'PauseChamp');
+        // channel.send(`I've been queuing for ${manager}'s wild ride for ages ${emoji.toString()}`);
+      },
+      debugChannel,
+      '!wildride'
+    );
+  } else if (messageIncludes('!wilderit')) {
+    runAndReport(
+      () => {
+        const manager = 'Slot';
+        const response = [
+          `Ik word al misselijk van ${manager}'s wilde rit.`,
+          `${manager}'s wilde rit is te heftig voor mij.`,
+          `${manager}'s wilde rit is echt goedkoop!`,
+          `${manager}'s wilde rit was top!`,
+          `Ik ga niet in ${manager}'s wilde rit als het regent.`,
+          `Ik wil in iets spannendere dan ${manager}'s wilde rit.`,
+          `${manager}'s wilde rit is te duur!`,
+          `Ik wil uit ${manager}'s wilde rit!`,
         ];
         const luckyNumber = Math.floor(Math.random() * response.length);
         channel.send(response[luckyNumber]);
@@ -500,38 +528,72 @@ export const checkForBanter = (msg: Discord.Message, channel, client, debugChann
       debugChannel,
       '!faze'
     );
+  } else if (messageIncludes('!valg')) {
+    runAndReport(
+      () => {
+        fetch('https://valgresultat.no/api/2025/st')
+          .then((response) =>
+            response.json().then(
+              (data: {
+                partier: Array<{
+                  id: {
+                    navn: string;
+                  };
+                  stemmer: {
+                    resultat: {
+                      prosent: number;
+                    };
+                  };
+                }>;
+              }) => {
+                const parties = data.partier;
+                let message = 'Foreløpig resultat 2025: ```';
+                parties.forEach((party) => {
+                  message += `${party.id.navn}: ${party.stemmer.resultat.prosent || 0}%\n`;
+                });
+                message += '```';
+                channel.send(message);
+              }
+            )
+          )
+          .catch((error) => debugChannel.send(`!valg blew up: ${error}`));
+      },
+      debugChannel,
+      '!valg'
+    );
   } else if (messageIncludes('!sperregrensa')) {
     runAndReport(
       () => {
-        fetch('https://valgresultat.no/api/2021/st').then((response) =>
-          response.json().then(
-            (data: {
-              partier: Array<{
-                id: {
-                  navn: string;
-                };
-                stemmer: {
-                  resultat: {
-                    prosent: number;
+        fetch('https://valgresultat.no/api/2025/st')
+          .then((response) =>
+            response.json().then(
+              (data: {
+                partier: Array<{
+                  id: {
+                    navn: string;
                   };
-                };
-              }>;
-            }) => {
-              const parties = data.partier;
-              const ripParties = [];
-              const happyParties = [];
-              let message = 'F i chat til ';
-              parties.forEach((party) => {
-                if (party.stemmer.resultat.prosent >= 4) {
-                  happyParties.push(party.id.navn);
-                } else if (party.stemmer.resultat.prosent > 2) {
-                  message += `${party.id.navn}, `;
-                }
-              });
-              channel.send(`${message}og my annet ræl.`);
-            }
+                  stemmer: {
+                    resultat: {
+                      prosent: number;
+                    };
+                  };
+                }>;
+              }) => {
+                const parties = data.partier;
+                const happyParties = [];
+                let message = 'F i chat til ';
+                parties.forEach((party) => {
+                  if (party.stemmer.resultat.prosent >= 4) {
+                    happyParties.push(party.id.navn);
+                  } else if (party.stemmer.resultat.prosent > 2) {
+                    message += `${party.id.navn}, `;
+                  }
+                });
+                channel.send(`${message}og my annet ræl.`);
+              }
+            )
           )
-        );
+          .catch((error) => debugChannel.send(`!sperregrensa blew up: ${error}`));
       },
       debugChannel,
       '!sperregrensa'

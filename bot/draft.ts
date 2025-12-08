@@ -1,12 +1,10 @@
 import * as Discord from 'discord.js';
-import { luckernoobOfTheWeek, rittardOfTheWeek, topDickOfTheWeek } from '../api/parser';
+import { luckernoobOfTheWeek } from '../api/parser';
 import {
   Bootstrap,
   GameweekScore,
   GameweekStats,
   LeagueDetails,
-  Player,
-  PlayerElement,
   PlayerElements,
 } from '../types/Fantasy';
 import { runAndReport } from './util';
@@ -19,7 +17,7 @@ export interface Standing {
   total: number;
 }
 
-const leagueCode = 22160;
+const leagueCode = 73383;
 const apiUrl = 'https://draft.premierleague.com/api';
 
 export const checkForDraft = (msg: Discord.Message, channel, debugChannel, client) => {

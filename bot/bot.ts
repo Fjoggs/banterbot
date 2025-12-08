@@ -27,6 +27,7 @@ let testChannel: Discord.Channel | undefined;
 let debugChannel: Discord.Channel | undefined;
 let mute = true;
 let currentYear = 2025;
+let tropoCelebrated = false;
 
 const preikChannelId = '110121552934100992';
 const fjoggsGeneralChannelId = '774731038391140375';
@@ -145,6 +146,11 @@ setInterval(() => {
     channel.send('https://www.youtube.com/watch?v=WJsIDnrZvVc');
   }
 
+  if (isTropoThursday()) {
+    // channel.send('DET ER TROPO-TORSDAG!! https://grans.no/produkter/tropo-uten-sukker/');
+    tropoCelebrated = true;
+  }
+
   // messages.forEach((message) => {
   //     if (!mute) {
   //         //@ts-ignore
@@ -158,6 +164,16 @@ const isNewYear = () => {
   const newYear = new Date().getFullYear();
   if (newYear !== currentYear) {
     currentYear = newYear;
+    return true;
+  } else {
+    return false;
+  }
+};
+
+const isTropoThursday = () => {
+  const currentDay = new Date().getDay();
+  if (currentDay === 4 && !tropoCelebrated) {
+    tropoCelebrated = true;
     return true;
   } else {
     return false;
