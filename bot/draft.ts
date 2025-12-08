@@ -17,7 +17,7 @@ export interface Standing {
   total: number;
 }
 
-const leagueCode = 73383;
+const leagueCode = 16779;
 const apiUrl = 'https://draft.premierleague.com/api';
 
 export const checkForDraft = (msg: Discord.Message, channel, debugChannel, client) => {
