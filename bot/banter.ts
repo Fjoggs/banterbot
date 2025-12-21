@@ -1,9 +1,12 @@
 import * as Discord from 'discord.js';
 import fetch from 'node-fetch';
 import {
+  AfkonkEntry,
+  getAfkonkCounter,
   getGress,
   getRandom,
   GressEntry,
+  increaseAfkonkCounter,
   increaseGressCounter,
   increaseLukakuCounter,
   RandomEntry,
@@ -418,6 +421,24 @@ export const checkForBanter = (msg: Discord.Message, channel, client, debugChann
       },
       debugChannel,
       '!lukaku'
+    );
+  } else if (messageIncludes('!afkonk')) {
+    runAndReport(
+      () => {
+        increaseAfkonkCounter(() => {
+          getAfkonkCounter((afkonk: AfkonkEntry) => {
+            let message = '';
+            const emoji = client.emojis.cache.find((emoji) => emoji.name === 'pepepopcorn');
+            for (let i = 0; i < afkonk.counter; i++) {
+              if (i % 5 === 0) message += '   ';
+              message += emoji.toString();
+            }
+            channel.send(message);
+          });
+        });
+      },
+      debugChannel,
+      '!afkonk'
     );
   } else if (messageIncludes('!sid')) {
     runAndReport(
