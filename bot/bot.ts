@@ -26,7 +26,7 @@ let channel: Discord.Channel | undefined;
 let testChannel: Discord.Channel | undefined;
 let debugChannel: Discord.Channel | undefined;
 let mute = true;
-let currentYear = 2025;
+let currentYear = 2026;
 let tropoCelebrated = false;
 
 const preikChannelId = '110121552934100992';
