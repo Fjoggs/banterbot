@@ -91,6 +91,7 @@ export const checkForDraft = (msg: Discord.Message, channel, debugChannel, clien
           const name = leagueDetails.league_entries.find(
             (entry) => entry.id === standing.league_entry
           ).entry_name;
+          console.log('standing', standing);
 
           if (name) {
             standings.push({
@@ -103,7 +104,7 @@ export const checkForDraft = (msg: Discord.Message, channel, debugChannel, clien
         });
         standings.sort((a, b) => b.points_for - a.points_for);
         standings.forEach((standing, index) => {
-          message += `${index + 1}. ${standing.name}: ${standing.points_for}\n`;
+          message += `${index + 1}. ${standing.name}: ${standing.total}\n`;
         });
         channel.send(message + '```');
       },
