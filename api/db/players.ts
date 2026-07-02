@@ -1,4 +1,4 @@
-import { sqlite3 } from 'sqlite3';
+import { DatabaseSync } from 'node:sqlite';
 
 export interface Player {
   playerId: number;
@@ -13,52 +13,46 @@ export interface Stats {
   rep: number;
 }
 
-const sqlite3: sqlite3 = require('sqlite3').verbose();
+const DB_PATH = './banterbot-database.db';
 
 export const changePlayerTotalRep = (playerId: number) => {
-  let db = new sqlite3.Database('./banterbot-database.db');
+  const db = new DatabaseSync(DB_PATH);
   console.log('changing rep for player', playerId);
-  db.serialize(() => {
-    db.run('UPDATE players SET rep=rep + 1 WHERE playerId = ?', [playerId], (error) => {
-      if (error) {
-        console.log('Something went wrong: ', error);
-      } else {
-        console.log('Changed rep for player:  ', playerId);
-      }
-    });
-  });
-  db.close();
+  try {
+    db.prepare('UPDATE players SET rep=rep + 1 WHERE playerId = ?').run(playerId);
+    console.log('Changed rep for player:  ', playerId);
+  } catch (error) {
+    console.log('Something went wrong: ', error);
+  } finally {
+    db.close();
+  }
 };
 
 export const getPlayers = (callback: Function) => {
-  const db = new sqlite3.Database('./banterbot-database.db');
-  db.serialize(() => {
-    db.all('SELECT * FROM players ORDER BY rep DESC', [], (error, rows: Array<Player>) => {
-      if (error) {
-        console.log('Something went wrong: ', error);
-      } else {
-        callback(rows);
-      }
-    });
-  });
-  db.close();
+  const db = new DatabaseSync(DB_PATH);
+  try {
+    const rows = db.prepare('SELECT * FROM players ORDER BY rep DESC').all() as Player[];
+    callback(rows);
+  } catch (error) {
+    console.log('Something went wrong: ', error);
+  } finally {
+    db.close();
+  }
 };
 
 export const getStats = (callback: Function) => {
-  const db = new sqlite3.Database('./banterbot-database.db');
-  db.serialize(() => {
-    db.all(
-      'SELECT result, bet, players.name, players.rep FROM bets JOIN challenges ON bets.challengeId = challenges.challengeId JOIN players ON players.playerId = bets.playerId  AND result IS NOT NULL order by players.rep',
-      [],
-      (error, rows: Array<Stats>) => {
-        if (error) {
-          console.log('Something went wrong: ', error);
-        } else {
-          console.log(rows);
-          callback(rows);
-        }
-      }
-    );
-  });
-  db.close();
+  const db = new DatabaseSync(DB_PATH);
+  try {
+    const rows = db
+      .prepare(
+        'SELECT result, bet, players.name, players.rep FROM bets JOIN challenges ON bets.challengeId = challenges.challengeId JOIN players ON players.playerId = bets.playerId  AND result IS NOT NULL order by players.rep'
+      )
+      .all() as Stats[];
+    console.log(rows);
+    callback(rows);
+  } catch (error) {
+    console.log('Something went wrong: ', error);
+  } finally {
+    db.close();
+  }
 };

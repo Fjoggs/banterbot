@@ -1,4 +1,4 @@
-import { sqlite3 } from 'sqlite3';
+import { DatabaseSync } from 'node:sqlite';
 
 export interface Reminder {
   id: number;
@@ -9,145 +9,130 @@ export interface Reminder {
   inProgress: boolean;
 }
 
-const sqlite3: sqlite3 = require('sqlite3').verbose();
+const DB_PATH = './banterbot-database.db';
 
 export const initDb = () => {
-  let db = new sqlite3.Database('./banterbot-database.db');
-  db.serialize(() => {
-    db.all(
-      'CREATE TABLE IF NOT EXISTS reminder (id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, message TEXT, who TEXT, time TEXT, reminded BOOLEAN, inProgress BOOLEAN)',
-      [],
-      (error) => {
-        if (error) {
-          console.log('Something went wrong: ', error);
-        }
-      }
+  const db = new DatabaseSync(DB_PATH);
+  try {
+    db.exec(
+      'CREATE TABLE IF NOT EXISTS reminder (id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, message TEXT, who TEXT, time TEXT, reminded BOOLEAN, inProgress BOOLEAN)'
     );
-  });
-  db.close();
+  } catch (error) {
+    console.log('Something went wrong: ', error);
+  } finally {
+    db.close();
+  }
 };
 
 export const getReminders = (callback: Function) => {
-  let db = new sqlite3.Database('./banterbot-database.db');
-  db.serialize(() => {
-    db.all('SELECT * FROM reminder', [], (error, rows: Array<Reminder>) => {
-      if (error) {
-        console.log('Something went wrong: ', error);
-      } else {
-        callback(rows);
-      }
-    });
-  });
-  db.close();
+  const db = new DatabaseSync(DB_PATH);
+  try {
+    const rows = db.prepare('SELECT * FROM reminder').all() as Reminder[];
+    callback(rows);
+  } catch (error) {
+    console.log('Something went wrong: ', error);
+  } finally {
+    db.close();
+  }
 };
 
 export const getFutureReminders = (callback: Function) => {
   const now = Date.now();
-  let db = new sqlite3.Database('./banterbot-database.db');
-  db.serialize(() => {
-    db.all('SELECT * FROM reminder WHERE time > ?', [now], (error, rows: Array<Reminder>) => {
-      if (error) {
-        console.log('Something went wrong: ', error);
-      } else {
-        callback(rows);
-      }
-    });
-  });
-  db.close();
+  const db = new DatabaseSync(DB_PATH);
+  try {
+    const rows = db.prepare('SELECT * FROM reminder WHERE time > ?').all(now) as Reminder[];
+    callback(rows);
+  } catch (error) {
+    console.log('Something went wrong: ', error);
+  } finally {
+    db.close();
+  }
 };
 
 export const getReminderById = (id: number, callback: Function) => {
-  let db = new sqlite3.Database('./banterbot-database.db');
-  db.serialize(() => {
-    db.get('SELECT * from reminder WHERE reminder = ?', [id], (error, row: Reminder) => {
-      if (error) {
-        console.log('Something went wrong: ', error);
-      } else {
-        callback(row);
-      }
-    });
-  });
-  db.close();
+  const db = new DatabaseSync(DB_PATH);
+  try {
+    const row = db.prepare('SELECT * from reminder WHERE reminder = ?').get(id) as
+      | Reminder
+      | undefined;
+    callback(row);
+  } catch (error) {
+    console.log('Something went wrong: ', error);
+  } finally {
+    db.close();
+  }
 };
 
 export const addReminder = (message: string, who: string, when: Date, callback: Function) => {
-  let db = new sqlite3.Database('./banterbot-database.db');
-  db.serialize(() => {
+  const db = new DatabaseSync(DB_PATH);
+  try {
     console.log(`Inserting reminder ${message}, ${who}, ${when} into db`);
-    db.run(
-      'INSERT INTO reminder (message, who, time, reminded, inProgress) VALUES(?, ?, ?, ?, ?)',
-      [message, who, when, false, false],
-      function (error) {
-        if (error) {
-          console.log('Something went wrong: ', error);
-        } else {
-          console.log('Inserted reminder: ', this.lastID);
-          callback();
-        }
-      }
-    );
-  });
-  db.close();
+    const result = db
+      .prepare(
+        'INSERT INTO reminder (message, who, time, reminded, inProgress) VALUES(?, ?, ?, ?, ?)'
+      )
+      .run(message, who, when.getTime(), 0, 0);
+    console.log('Inserted reminder: ', result.lastInsertRowid);
+    callback();
+  } catch (error) {
+    console.log('Something went wrong: ', error);
+  } finally {
+    db.close();
+  }
 };
 
 export const undoneReminder = (id: number, callback: Function) => {
-  let db = new sqlite3.Database('./banterbot-database.db');
-  db.serialize(() => {
-    db.get('UPDATE reminder SET reminded = false where id = ?', [id], (error, _) => {
-      if (error) {
-        console.log('Something went wrong: ', error);
-      } else {
-        console.log('Sat reminded = false for  reminder with id', id);
-        callback();
-      }
-    });
-  });
-  db.close();
+  const db = new DatabaseSync(DB_PATH);
+  try {
+    db.prepare('UPDATE reminder SET reminded = false where id = ?').run(id);
+    console.log('Sat reminded = false for  reminder with id', id);
+    callback();
+  } catch (error) {
+    console.log('Something went wrong: ', error);
+  } finally {
+    db.close();
+  }
 };
 
 export const completeReminder = (id: number, callback: Function) => {
-  let db = new sqlite3.Database('./banterbot-database.db');
-  db.serialize(() => {
-    db.get('UPDATE reminder SET reminded = true where id = ?', [id], (error, _) => {
-      if (error) {
-        console.log('Something went wrong: ', error);
-      } else {
-        console.log('Completed reminder', id);
-        callback();
-      }
-    });
-  });
-  db.close();
+  const db = new DatabaseSync(DB_PATH);
+  try {
+    db.prepare('UPDATE reminder SET reminded = true where id = ?').run(id);
+    console.log('Completed reminder', id);
+    callback();
+  } catch (error) {
+    console.log('Something went wrong: ', error);
+  } finally {
+    db.close();
+  }
 };
 
 export const deleteReminder = (id: number, callback: Function) => {
-  let db = new sqlite3.Database('./banterbot-database.db');
-  db.serialize(() => {
+  const db = new DatabaseSync(DB_PATH);
+  try {
     console.log(`Deleting reminder with  ${id}`);
-    db.run('DELETE FROM reminder WHERE id = ?', [id], function (error) {
-      if (error) {
-        console.log('Something went wrong: ', error);
-      } else {
-        console.log('Deleted reminder list with  and changes:  ', id, this.changes);
-        callback(`Sletta reminder med  ${id} (endringer: ${this.changes})`);
-      }
-    });
-  });
-  db.close();
+    const result = db.prepare('DELETE FROM reminder WHERE id = ?').run(id);
+    console.log('Deleted reminder list with  and changes:  ', id, result.changes);
+    callback(`Sletta reminder med  ${id} (endringer: ${result.changes})`);
+  } catch (error) {
+    console.log('Something went wrong: ', error);
+  } finally {
+    db.close();
+  }
 };
 
 export const finishReminder = (id: number, completed: boolean, callback: Function) => {
-  let db = new sqlite3.Database('./banterbot-database.db');
-  db.serialize(() => {
+  const db = new DatabaseSync(DB_PATH);
+  try {
     console.log(`Updating reminder list with  ${id} with status ${completed}`);
-    db.run('UPDATE reminder SET completed = ? where id = ?', [completed, id], function (error) {
-      if (error) {
-        console.log('Something went wrong: ', error);
-      } else {
-        console.log('Updated reminder with  and result:  ', id, completed);
-        callback(this.changes);
-      }
-    });
-  });
-  db.close();
+    const result = db
+      .prepare('UPDATE reminder SET completed = ? where id = ?')
+      .run(Number(completed), id);
+    console.log('Updated reminder with  and result:  ', id, completed);
+    callback(result.changes);
+  } catch (error) {
+    console.log('Something went wrong: ', error);
+  } finally {
+    db.close();
+  }
 };

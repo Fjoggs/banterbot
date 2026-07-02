@@ -1,4 +1,4 @@
-import { sqlite3 } from 'sqlite3';
+import { DatabaseSync } from 'node:sqlite';
 
 export interface Shopping {
   shoppingId: number;
@@ -6,153 +6,126 @@ export interface Shopping {
   completed: boolean;
 }
 
-const sqlite3: sqlite3 = require('sqlite3').verbose();
+const DB_PATH = './banterbot-database.db';
 
 export const initDb = () => {
-  let db = new sqlite3.Database('./banterbot-database.db');
-  db.serialize(() => {
-    db.all(
-      'CREATE TABLE IF NOT EXISTS shopping (shoppingId INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, items TEXT, completed BOOLEAN)',
-      [],
-      (error) => {
-        if (error) {
-          console.log('Something went wrong: ', error);
-        }
-      }
+  const db = new DatabaseSync(DB_PATH);
+  try {
+    db.exec(
+      'CREATE TABLE IF NOT EXISTS shopping (shoppingId INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, items TEXT, completed BOOLEAN)'
     );
-  });
-  db.close();
+  } catch (error) {
+    console.log('Something went wrong: ', error);
+  } finally {
+    db.close();
+  }
 };
 
 export const getShopping = (callback: Function) => {
-  let db = new sqlite3.Database('./banterbot-database.db');
-  db.serialize(() => {
-    db.all(
-      'SELECT shoppingId, items, completed FROM shopping',
-      [],
-      (error, rows: Array<Shopping>) => {
-        if (error) {
-          console.log('Something went wrong: ', error);
-        } else {
-          callback(rows);
-        }
-      }
-    );
-  });
-  db.close();
+  const db = new DatabaseSync(DB_PATH);
+  try {
+    const rows = db.prepare('SELECT shoppingId, items, completed FROM shopping').all() as Shopping[];
+    callback(rows);
+  } catch (error) {
+    console.log('Something went wrong: ', error);
+  } finally {
+    db.close();
+  }
 };
 
 export const getShoppingById = (shoppingId: number, callback: Function) => {
-  let db = new sqlite3.Database('./banterbot-database.db');
-  db.serialize(() => {
-    db.get('SELECT * from shopping WHERE shoppingId = ?', [shoppingId], (error, row: Shopping) => {
-      if (error) {
-        console.log('Something went wrong: ', error);
-      } else {
-        callback(row);
-      }
-    });
-  });
-  db.close();
+  const db = new DatabaseSync(DB_PATH);
+  try {
+    const row = db.prepare('SELECT * from shopping WHERE shoppingId = ?').get(shoppingId) as
+      | Shopping
+      | undefined;
+    callback(row);
+  } catch (error) {
+    console.log('Something went wrong: ', error);
+  } finally {
+    db.close();
+  }
 };
 
 export const updateShopping = (shoppingId: number, shoppingList: string[], callback: Function) => {
-  let db = new sqlite3.Database('./banterbot-database.db');
   getShoppingById(shoppingId, (existingList: Shopping) => {
     if (existingList.completed) {
       callback(false);
     } else {
       console.log('adding items', shoppingList.join(', '));
-      db.serialize(() => {
-        db.get(
-          "UPDATE shopping SET items = (items || ', ' || ?) where shoppingId = ?",
-          [shoppingList.join(', '), shoppingId],
-          (error, row: Shopping) => {
-            if (error) {
-              console.log('Something went wrong: ', error);
-            } else {
-              console.log('Updated shopping list', shoppingId, shoppingList);
-              callback(true);
-            }
-          }
+      const db = new DatabaseSync(DB_PATH);
+      try {
+        db.prepare("UPDATE shopping SET items = (items || ', ' || ?) where shoppingId = ?").run(
+          shoppingList.join(', '),
+          shoppingId
         );
-      });
-      db.close();
+        console.log('Updated shopping list', shoppingId, shoppingList);
+        callback(true);
+      } catch (error) {
+        console.log('Something went wrong: ', error);
+      } finally {
+        db.close();
+      }
     }
   });
 };
 
 export const addShopping = (shoppingList: string[], callback: Function) => {
-  let db = new sqlite3.Database('./banterbot-database.db');
-  db.serialize(() => {
+  const db = new DatabaseSync(DB_PATH);
+  try {
     console.log(`Inserting shopping list into db`);
-    db.run(
-      'INSERT INTO shopping (items, completed) VALUES(?, ?)',
-      [shoppingList, false],
-      function (error) {
-        if (error) {
-          console.log('Something went wrong: ', error);
-        } else {
-          console.log('Inserted shoping list id: ', this.lastID);
-          callback(this.lastID, shoppingList);
-        }
-      }
+    const result = db.prepare('INSERT INTO shopping (items, completed) VALUES(?, ?)').run(
+      shoppingList.join(', '),
+      0
     );
-  });
-  db.close();
+    console.log('Inserted shoping list id: ', result.lastInsertRowid);
+    callback(result.lastInsertRowid, shoppingList);
+  } catch (error) {
+    console.log('Something went wrong: ', error);
+  } finally {
+    db.close();
+  }
 };
 
 export const undoneShopping = (shoppingId: number, callback: Function) => {
-  let db = new sqlite3.Database('./banterbot-database.db');
-  db.serialize(() => {
-    db.get(
-      'UPDATE shopping SET completed = false where shoppingId = ?',
-      [shoppingId],
-      (error, row: Shopping) => {
-        if (error) {
-          console.log('Something went wrong: ', error);
-        } else {
-          console.log('Opened shopping list', shoppingId);
-          callback();
-        }
-      }
-    );
-  });
-  db.close();
+  const db = new DatabaseSync(DB_PATH);
+  try {
+    db.prepare('UPDATE shopping SET completed = false where shoppingId = ?').run(shoppingId);
+    console.log('Opened shopping list', shoppingId);
+    callback();
+  } catch (error) {
+    console.log('Something went wrong: ', error);
+  } finally {
+    db.close();
+  }
 };
 
 export const deleteShopping = (shoppingId: number, callback: Function) => {
-  let db = new sqlite3.Database('./banterbot-database.db');
-  db.serialize(() => {
+  const db = new DatabaseSync(DB_PATH);
+  try {
     console.log(`Deleting shopping with id ${shoppingId}`);
-    db.run('DELETE FROM shopping WHERE shoppingId = ?', [shoppingId], function (error) {
-      if (error) {
-        console.log('Something went wrong: ', error);
-      } else {
-        console.log('Deleted shopping list with id and changes:  ', shoppingId, this.changes);
-        callback(`Sletta shopping med id ${shoppingId} (endringer: ${this.changes})`);
-      }
-    });
-  });
-  db.close();
+    const result = db.prepare('DELETE FROM shopping WHERE shoppingId = ?').run(shoppingId);
+    console.log('Deleted shopping list with id and changes:  ', shoppingId, result.changes);
+    callback(`Sletta shopping med id ${shoppingId} (endringer: ${result.changes})`);
+  } catch (error) {
+    console.log('Something went wrong: ', error);
+  } finally {
+    db.close();
+  }
 };
 
 export const finishShopping = (shoppingId: number, completed: boolean, callback: Function) => {
-  let db = new sqlite3.Database('./banterbot-database.db');
-  db.serialize(() => {
+  const db = new DatabaseSync(DB_PATH);
+  try {
     console.log(`Updating shopping list with id ${shoppingId} with status ${completed}`);
-    db.run(
-      'UPDATE shopping SET completed = ? where shoppingId = ?',
-      [completed, shoppingId],
-      function (error) {
-        if (error) {
-          console.log('Something went wrong: ', error);
-        } else {
-          console.log('Updated shopping with id and result:  ', shoppingId, completed);
-          callback(this.changes);
-        }
-      }
-    );
-  });
-  db.close();
+    const result = db
+      .prepare('UPDATE shopping SET completed = ? where shoppingId = ?')
+      .run(Number(completed), shoppingId);
+    console.log('Updated shopping with id and result:  ', shoppingId, completed);
+    callback(result.changes);
+  } catch (error) {
+    console.log('Something went wrong: ', error);
+  } finally {
+    db.close();
+  }
 };

@@ -1,4 +1,4 @@
-import { sqlite3 } from 'sqlite3';
+import { DatabaseSync } from 'node:sqlite';
 
 export interface Challenge {
     challengeId: number;
@@ -7,140 +7,123 @@ export interface Challenge {
     result: string;
 }
 
-const sqlite3: sqlite3 = require('sqlite3').verbose();
+const DB_PATH = './banterbot-database.db';
 
 export const getChallenges = (callback: Function) => {
-    let db = new sqlite3.Database('./banterbot-database.db');
-    db.serialize(() => {
-        db.all('SELECT * from challenges', [], (error, rows: Array<Challenge>) => {
-            if (error) {
-                console.log('Something went wrong: ', error);
-            } else {
-                callback(rows);
-            }
-        });
-    });
-    db.close();
+    const db = new DatabaseSync(DB_PATH);
+    try {
+        const rows = db.prepare('SELECT * from challenges').all() as Challenge[];
+        callback(rows);
+    } catch (error) {
+        console.log('Something went wrong: ', error);
+    } finally {
+        db.close();
+    }
 };
 
 export const getChallenge = (challengeId: number, callback: Function) => {
-    let db = new sqlite3.Database('./banterbot-database.db');
-    db.serialize(() => {
-        db.get(
-            'SELECT * from challenges WHERE challengeId = ?',
-            [challengeId],
-            (error, row: Challenge) => {
-                if (error) {
-                    console.log('Something went wrong: ', error);
-                } else {
-                    callback(row);
-                }
-            }
-        );
-    });
-    db.close();
+    const db = new DatabaseSync(DB_PATH);
+    try {
+        const row = db.prepare('SELECT * from challenges WHERE challengeId = ?').get(challengeId) as
+            | Challenge
+            | undefined;
+        callback(row);
+    } catch (error) {
+        console.log('Something went wrong: ', error);
+    } finally {
+        db.close();
+    }
 };
 
 export const updateChallenge = (challengeId: number, options: string, callback: Function) => {
-    let db = new sqlite3.Database('./banterbot-database.db');
-    db.serialize(() => {
-        db.get(
-            'UPDATE Challenges set options = ? WHERE challengeId = ?',
-            [options, challengeId],
-            (error, row: Challenge) => {
-                if (error) {
-                    console.log('Something went wrong: ', error);
-                } else {
-                    console.log('Updated challenge', challengeId, options);
-                    callback();
-                }
-            }
+    const db = new DatabaseSync(DB_PATH);
+    try {
+        db.prepare('UPDATE Challenges set options = ? WHERE challengeId = ?').run(
+            options,
+            challengeId
         );
-    });
-    db.close();
+        console.log('Updated challenge', challengeId, options);
+        callback();
+    } catch (error) {
+        console.log('Something went wrong: ', error);
+    } finally {
+        db.close();
+    }
 };
 
 export const addChallenge = (name: string, options: string, callback: Function) => {
-    let db = new sqlite3.Database('./banterbot-database.db');
-    db.serialize(() => {
+    const db = new DatabaseSync(DB_PATH);
+    try {
         console.log(`Inserting ${name} into db`);
-        db.run(
-            'INSERT INTO challenges (name, options) VALUES(?, ?)',
-            [name, options],
-            function (error) {
-                if (error) {
-                    console.log('Something went wrong: ', error);
-                } else {
-                    console.log('Inserted challenge with name and id:  ', name, this.lastID);
-                    callback(this.lastID);
-                }
-            }
+        const result = db.prepare('INSERT INTO challenges (name, options) VALUES(?, ?)').run(
+            name,
+            options
         );
-    });
-    db.close();
+        console.log('Inserted challenge with name and id:  ', name, result.lastInsertRowid);
+        callback(result.lastInsertRowid);
+    } catch (error) {
+        console.log('Something went wrong: ', error);
+    } finally {
+        db.close();
+    }
 };
 
 export const addChallengeToLeague = (challengeId: number, leagueId: number, callback: Function) => {
-    let db = new sqlite3.Database('./banterbot-database.db');
-    db.run(
-        'INSERT INTO league_challenges (leagueId, challengeId) VALUES(?, ?)',
-        [leagueId, challengeId],
-        function (error) {
-            if (error) {
-                console.log('Something went wrong: ', error);
-            } else {
-                console.log(
-                    'Inserted challenge into league_challenges with leagueId and challengeId:  ',
-                    leagueId,
-                    challengeId
-                );
-                callback();
-            }
-        }
-    );
-    db.close();
+    const db = new DatabaseSync(DB_PATH);
+    try {
+        db.prepare('INSERT INTO league_challenges (leagueId, challengeId) VALUES(?, ?)').run(
+            leagueId,
+            challengeId
+        );
+        console.log(
+            'Inserted challenge into league_challenges with leagueId and challengeId:  ',
+            leagueId,
+            challengeId
+        );
+        callback();
+    } catch (error) {
+        console.log('Something went wrong: ', error);
+    } finally {
+        db.close();
+    }
 };
 
 export const deleteChallenge = (challengeId: number, callback: Function) => {
-    let db = new sqlite3.Database('./banterbot-database.db');
-    db.serialize(() => {
+    const db = new DatabaseSync(DB_PATH);
+    try {
         console.log(`Deleting challenge with id ${challengeId}`);
-        db.run('DELETE FROM challenges WHERE challengeId = ?', [challengeId], function (error) {
-            if (error) {
-                console.log('Something went wrong: ', error);
-            } else {
-                console.log('Deleted challenge with id and changes:  ', challengeId, this.changes);
-                callback(`Sletta spill med id ${challengeId} (endringer: ${this.changes})`);
-            }
-        });
-        db.run('DELETE FROM bets WHERE challengeId = ?', [challengeId], function (error) {
-            if (error) {
-                console.log('Something went wrong: ', error);
-            } else {
-                console.log('Deleted bets with id and changes:  ', challengeId, this.changes);
-                callback(`Sletta bets med challengeId ${challengeId} (endringer: ${this.changes})`);
-            }
-        });
-    });
-    db.close();
+        const deletedChallenges = db
+            .prepare('DELETE FROM challenges WHERE challengeId = ?')
+            .run(challengeId);
+        console.log(
+            'Deleted challenge with id and changes:  ',
+            challengeId,
+            deletedChallenges.changes
+        );
+        callback(`Sletta spill med id ${challengeId} (endringer: ${deletedChallenges.changes})`);
+
+        const deletedBets = db.prepare('DELETE FROM bets WHERE challengeId = ?').run(challengeId);
+        console.log('Deleted bets with id and changes:  ', challengeId, deletedBets.changes);
+        callback(`Sletta bets med challengeId ${challengeId} (endringer: ${deletedBets.changes})`);
+    } catch (error) {
+        console.log('Something went wrong: ', error);
+    } finally {
+        db.close();
+    }
 };
 
 export const finishChallenge = (challengeId: number, result: string, callback: Function) => {
-    let db = new sqlite3.Database('./banterbot-database.db');
-    db.serialize(() => {
+    const db = new DatabaseSync(DB_PATH);
+    try {
         console.log(`Updating challenge with id ${challengeId} with result ${result}`);
-        db.run(
-            'UPDATE challenges SET result = ? where challengeId = ?',
-            [result, challengeId],
-            function (error) {
-                if (error) {
-                    console.log('Something went wrong: ', error);
-                } else {
-                    console.log('Updated challenge with id and result:  ', challengeId, result);
-                    callback(this.changes);
-                }
-            }
-        );
-    });
-    db.close();
+        const dbResult = db
+            .prepare('UPDATE challenges SET result = ? where challengeId = ?')
+            .run(result, challengeId);
+        console.log('Updated challenge with id and result:  ', challengeId, result);
+        callback(dbResult.changes);
+    } catch (error) {
+        console.log('Something went wrong: ', error);
+    } finally {
+        db.close();
+    }
 };
