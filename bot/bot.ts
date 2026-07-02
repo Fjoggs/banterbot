@@ -74,7 +74,6 @@ client.on('messageReactionAdd', async (reaction) => {
 });
 
 client.on('messageCreate', async (message) => {
-  const messageIsEqual = (phrase: string) => message.content.toLowerCase() === phrase;
   const messageIncludes = (phrase: string) => message.content.toLowerCase().includes(phrase);
   const channelMessageCameFrom = client.channels.cache.get(message.channelId);
 
@@ -95,22 +94,22 @@ client.on('messageCreate', async (message) => {
       insertOrUpdateUsage(unicodeEmoji);
     });
   }
-  if (messageIsEqual('!stats')) {
-    getStatsTop5((emojies: Array<Stats>) => {
-      try {
-        printStats(emojies);
-      } catch (error) {
-        //@ts-expect-error
-        debugChannel.send(`Command !stats failed with error: ${error}`);
-      }
-    });
-  } else if (messageIsEqual('!statsall')) {
+  if (messageIncludes('!statsall')) {
     getStatsAll((emojies: Array<Stats>) => {
       try {
         printStats(emojies);
       } catch (error) {
         //@ts-expect-error
         debugChannel.send(`Command !statsall failed with error: ${error}`);
+      }
+    });
+  } else if (messageIncludes('!stats')) {
+    getStatsTop5((emojies: Array<Stats>) => {
+      try {
+        printStats(emojies);
+      } catch (error) {
+        //@ts-expect-error
+        debugChannel.send(`Command !stats failed with error: ${error}`);
       }
     });
   } else if (messageIncludes('!mute')) {
@@ -180,6 +179,21 @@ const isTropoThursday = () => {
   }
 };
 
+const sendChunked = (targetChannel, text: string, limit = 1900) => {
+  let remaining = text;
+  while (remaining.length > 0) {
+    if (remaining.length <= limit) {
+      targetChannel.send(remaining);
+      break;
+    }
+    let splitAt = remaining.lastIndexOf('\n', limit);
+    if (splitAt <= 0) splitAt = remaining.lastIndexOf(' ', limit);
+    if (splitAt <= 0) splitAt = limit;
+    targetChannel.send(remaining.slice(0, splitAt));
+    remaining = remaining.slice(splitAt).replace(/^\s+/, '');
+  }
+};
+
 const printStats = (emojies: Stats[]) => {
   let message = 'Usage:\n';
   let previousEmoji: Stats = undefined;
@@ -212,5 +226,5 @@ const printStats = (emojies: Stats[]) => {
   });
   message += ` ${previousEmoji.usage}`;
   //@ts-ignore
-  channel.send(message);
+  sendChunked(channel, message);
 };

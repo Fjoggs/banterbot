@@ -39,6 +39,21 @@ const makeMessage = (content: string) =>
 // Reproduces bot/bot.ts's printStats verbatim (including its crash-on-empty-usage bug)
 // so commands fail here the same way they'd fail for real. Uses emoji.name directly
 // instead of client.emojis.cache.find, since the mock client has no real emoji cache.
+const sendChunked = (targetChannel, text: string, limit = 1900) => {
+  let remaining = text;
+  while (remaining.length > 0) {
+    if (remaining.length <= limit) {
+      targetChannel.send(remaining);
+      break;
+    }
+    let splitAt = remaining.lastIndexOf('\n', limit);
+    if (splitAt <= 0) splitAt = remaining.lastIndexOf(' ', limit);
+    if (splitAt <= 0) splitAt = limit;
+    targetChannel.send(remaining.slice(0, splitAt));
+    remaining = remaining.slice(splitAt).replace(/^\s+/, '');
+  }
+};
+
 const printStats = (emojies: Stats[]) => {
   let message = 'Usage:\n';
   let previousEmoji: Stats = undefined;
@@ -62,31 +77,30 @@ const printStats = (emojies: Stats[]) => {
     }
   });
   message += ` ${previousEmoji.usage}`;
-  channel.send(message);
+  sendChunked(channel, message);
 };
 
 // Mirrors the dispatch block in bot/bot.ts's messageCreate handler.
 // Keep in sync if commands are added/changed there.
 const dispatch = (content: string) => {
   const message = makeMessage(content);
-  const messageIsEqual = (phrase: string) => message.content.toLowerCase() === phrase;
   const messageIncludes = (phrase: string) => message.content.toLowerCase().includes(phrase);
   const isBot = message.author.username === 'BanterBOT';
 
-  if (messageIsEqual('!stats')) {
-    getStatsTop5((emojies: Stats[]) => {
-      try {
-        printStats(emojies);
-      } catch (error) {
-        debugChannel.send(`Command !stats failed with error: ${error}`);
-      }
-    });
-  } else if (messageIsEqual('!statsall')) {
+  if (messageIncludes('!statsall')) {
     getStatsAll((emojies: Stats[]) => {
       try {
         printStats(emojies);
       } catch (error) {
         debugChannel.send(`Command !statsall failed with error: ${error}`);
+      }
+    });
+  } else if (messageIncludes('!stats')) {
+    getStatsTop5((emojies: Stats[]) => {
+      try {
+        printStats(emojies);
+      } catch (error) {
+        debugChannel.send(`Command !stats failed with error: ${error}`);
       }
     });
   } else if (messageIncludes('!mute')) {
