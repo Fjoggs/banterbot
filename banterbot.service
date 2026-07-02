@@ -1,0 +1,15 @@
+[Unit]
+Description=Banterbot Discord bot
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+WorkingDirectory=%h/projects/banterbot
+ExecStart=%h/.local/share/fnm/aliases/default/bin/npm run bot
+Environment=PATH=%h/.local/share/fnm/aliases/default/bin:/usr/bin:/bin
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=default.target
