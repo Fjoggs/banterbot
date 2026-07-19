@@ -48,8 +48,8 @@ export const getShoppingById = (shoppingId: number, callback: Function) => {
 };
 
 export const updateShopping = (shoppingId: number, shoppingList: string[], callback: Function) => {
-  getShoppingById(shoppingId, (existingList: Shopping) => {
-    if (existingList.completed) {
+  getShoppingById(shoppingId, (existingList: Shopping | undefined) => {
+    if (!existingList || existingList.completed) {
       callback(false);
     } else {
       console.log('adding items', shoppingList.join(', '));

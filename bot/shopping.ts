@@ -3,6 +3,7 @@ import {
   addShopping,
   finishShopping,
   getShopping,
+  getShoppingById,
   initDb,
   Shopping,
   undoneShopping as reopenShopping,
@@ -63,9 +64,16 @@ export const checkForShopping = (msg: Discord.Message, channel, debugChannel) =>
       });
     }
   } else if (messageIncludes('!liste')) {
-    currentShoppingId = Number(msg.content.toLowerCase().replace('!liste ', ''));
-    if (currentShoppingId) {
-      channel.send(`Aktiv liste er nå ${currentShoppingId}`);
+    const shoppingId = Number(msg.content.toLowerCase().replace('!liste ', ''));
+    if (shoppingId) {
+      getShoppingById(shoppingId, (shoppingList: Shopping | undefined) => {
+        if (shoppingList) {
+          currentShoppingId = shoppingId;
+          channel.send(`Aktiv liste er nå ${currentShoppingId}`);
+        } else {
+          channel.send(`Fant ingen liste med id ${shoppingId}`);
+        }
+      });
     } else {
       channel.send('kis');
     }
