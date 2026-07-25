@@ -1,131 +1,163 @@
-import { DatabaseSync } from 'node:sqlite';
+import { env } from '../../app-env';
 
-export interface Shopping {
-  shoppingId: number;
-  items: string;
-  completed: boolean;
+const API_URL = env.SOMMERLAN_API_URL;
+const SERVICE_TOKEN = env.SHOPPING_SERVICE_TOKEN;
+
+export interface ShoppingItem {
+  id: number;
+  listId: number;
+  name: string;
+  quantity: number;
+  checked: boolean;
 }
 
-const DB_PATH = './banterbot-database.db';
+export type ShoppingStatus = 'active' | 'completed';
 
-export const initDb = () => {
-  const db = new DatabaseSync(DB_PATH);
+export interface ShoppingListSummary {
+  id: number;
+  name: string;
+  status: ShoppingStatus;
+  itemCount: number;
+}
+
+export interface ShoppingListDetail {
+  id: number;
+  name: string;
+  status: ShoppingStatus;
+  items: ShoppingItem[];
+}
+
+export interface ShoppingItemInput {
+  name: string;
+  quantity: number;
+}
+
+const authHeaders = (discordId?: string): Record<string, string> => {
+  const headers: Record<string, string> = {
+    Authorization: `Bearer ${SERVICE_TOKEN}`,
+    'Content-Type': 'application/json',
+  };
+  if (discordId) headers['X-Discord-Id'] = discordId;
+  return headers;
+};
+
+export const getShopping = async (callback: (lists: ShoppingListSummary[]) => void) => {
   try {
-    db.exec(
-      'CREATE TABLE IF NOT EXISTS shopping (shoppingId INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, items TEXT, completed BOOLEAN)'
-    );
+    const res = await fetch(`${API_URL}/shopping/`, { headers: authHeaders() });
+    if (!res.ok) {
+      callback([]);
+      return;
+    }
+    callback((await res.json()) as ShoppingListSummary[]);
   } catch (error) {
     console.log('Something went wrong: ', error);
-  } finally {
-    db.close();
+    callback([]);
   }
 };
 
-export const getShopping = (callback: Function) => {
-  const db = new DatabaseSync(DB_PATH);
+export const getShoppingById = async (
+  shoppingId: number,
+  callback: (list: ShoppingListDetail | undefined) => void
+) => {
   try {
-    const rows = db.prepare('SELECT shoppingId, items, completed FROM shopping').all() as Shopping[];
-    callback(rows);
+    const res = await fetch(`${API_URL}/shopping/${shoppingId}/`, { headers: authHeaders() });
+    if (!res.ok) {
+      callback(undefined);
+      return;
+    }
+    callback((await res.json()) as ShoppingListDetail);
   } catch (error) {
     console.log('Something went wrong: ', error);
-  } finally {
-    db.close();
+    callback(undefined);
   }
 };
 
-export const getShoppingById = (shoppingId: number, callback: Function) => {
-  const db = new DatabaseSync(DB_PATH);
+export const addShopping = async (
+  name: string,
+  items: ShoppingItemInput[],
+  discordId: string | undefined,
+  callback: (id: number | undefined) => void
+) => {
   try {
-    const row = db.prepare('SELECT * from shopping WHERE shoppingId = ?').get(shoppingId) as
-      | Shopping
-      | undefined;
-    callback(row);
+    const listRes = await fetch(`${API_URL}/shopping/`, {
+      method: 'POST',
+      headers: authHeaders(discordId),
+      body: JSON.stringify({ name }),
+    });
+    if (!listRes.ok) {
+      callback(undefined);
+      return;
+    }
+    const list = (await listRes.json()) as ShoppingListDetail;
+    for (const item of items) {
+      await fetch(`${API_URL}/shopping/${list.id}/items/`, {
+        method: 'POST',
+        headers: authHeaders(discordId),
+        body: JSON.stringify(item),
+      });
+    }
+    console.log('Created shopping list', list.id, items);
+    callback(list.id);
   } catch (error) {
     console.log('Something went wrong: ', error);
-  } finally {
-    db.close();
+    callback(undefined);
   }
 };
 
-export const updateShopping = (shoppingId: number, shoppingList: string[], callback: Function) => {
-  getShoppingById(shoppingId, (existingList: Shopping | undefined) => {
-    if (!existingList || existingList.completed) {
-      callback(false);
-    } else {
-      console.log('adding items', shoppingList.join(', '));
-      const db = new DatabaseSync(DB_PATH);
-      try {
-        db.prepare("UPDATE shopping SET items = (items || ', ' || ?) where shoppingId = ?").run(
-          shoppingList.join(', '),
-          shoppingId
-        );
-        console.log('Updated shopping list', shoppingId, shoppingList);
-        callback(true);
-      } catch (error) {
-        console.log('Something went wrong: ', error);
-      } finally {
-        db.close();
+export const updateShopping = async (
+  shoppingId: number,
+  items: ShoppingItemInput[],
+  discordId: string | undefined,
+  callback: (updated: boolean) => void
+) => {
+  try {
+    for (const item of items) {
+      const res = await fetch(`${API_URL}/shopping/${shoppingId}/items/`, {
+        method: 'POST',
+        headers: authHeaders(discordId),
+        body: JSON.stringify(item),
+      });
+      if (!res.ok) {
+        // 404 (unknown list) or 409 (list already completed) both mean "can't add"
+        callback(false);
+        return;
       }
     }
-  });
-};
-
-export const addShopping = (shoppingList: string[], callback: Function) => {
-  const db = new DatabaseSync(DB_PATH);
-  try {
-    console.log(`Inserting shopping list into db`);
-    const result = db.prepare('INSERT INTO shopping (items, completed) VALUES(?, ?)').run(
-      shoppingList.join(', '),
-      0
-    );
-    console.log('Inserted shoping list id: ', result.lastInsertRowid);
-    callback(result.lastInsertRowid, shoppingList);
+    console.log('Updated shopping list', shoppingId, items);
+    callback(true);
   } catch (error) {
     console.log('Something went wrong: ', error);
-  } finally {
-    db.close();
+    callback(false);
   }
 };
 
-export const undoneShopping = (shoppingId: number, callback: Function) => {
-  const db = new DatabaseSync(DB_PATH);
+export const finishShopping = async (shoppingId: number, completed: boolean, callback: () => void) => {
   try {
-    db.prepare('UPDATE shopping SET completed = false where shoppingId = ?').run(shoppingId);
-    console.log('Opened shopping list', shoppingId);
+    await fetch(`${API_URL}/shopping/${shoppingId}/`, {
+      method: 'PATCH',
+      headers: authHeaders(),
+      body: JSON.stringify({ status: completed ? 'completed' : 'active' }),
+    });
+    console.log('Updated shopping status', shoppingId, completed);
+  } catch (error) {
+    console.log('Something went wrong: ', error);
+  } finally {
     callback();
-  } catch (error) {
-    console.log('Something went wrong: ', error);
-  } finally {
-    db.close();
   }
 };
 
-export const deleteShopping = (shoppingId: number, callback: Function) => {
-  const db = new DatabaseSync(DB_PATH);
-  try {
-    console.log(`Deleting shopping with id ${shoppingId}`);
-    const result = db.prepare('DELETE FROM shopping WHERE shoppingId = ?').run(shoppingId);
-    console.log('Deleted shopping list with id and changes:  ', shoppingId, result.changes);
-    callback(`Sletta shopping med id ${shoppingId} (endringer: ${result.changes})`);
-  } catch (error) {
-    console.log('Something went wrong: ', error);
-  } finally {
-    db.close();
-  }
-};
+export const undoneShopping = (shoppingId: number, callback: () => void) =>
+  finishShopping(shoppingId, false, callback);
 
-export const finishShopping = (shoppingId: number, completed: boolean, callback: Function) => {
-  const db = new DatabaseSync(DB_PATH);
+export const deleteShopping = async (shoppingId: number, callback: (message: string) => void) => {
   try {
-    console.log(`Updating shopping list with id ${shoppingId} with status ${completed}`);
-    const result = db
-      .prepare('UPDATE shopping SET completed = ? where shoppingId = ?')
-      .run(Number(completed), shoppingId);
-    console.log('Updated shopping with id and result:  ', shoppingId, completed);
-    callback(result.changes);
+    const res = await fetch(`${API_URL}/shopping/${shoppingId}/`, {
+      method: 'DELETE',
+      headers: authHeaders(),
+    });
+    callback(`Sletta shopping med id ${shoppingId} (status: ${res.status})`);
   } catch (error) {
     console.log('Something went wrong: ', error);
-  } finally {
-    db.close();
+    callback('Noe gikk galt');
   }
 };
