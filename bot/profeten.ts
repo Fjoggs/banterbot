@@ -68,7 +68,7 @@ export const checkForProfeten = (msg: Discord.Message, channel, debugChannel) =>
   const messageStartsWith = (phrase: string) => msg.content.toLowerCase().startsWith(phrase);
 
   if (messageIsEqual('!help')) {
-    const embed = new Discord.MessageEmbed().setTitle('Commands').addFields(
+    const embed = new Discord.EmbedBuilder().setTitle('Commands').addFields(
       {
         name: '!spill',
         value: 'Viser alle spill, åpen eller lukket',

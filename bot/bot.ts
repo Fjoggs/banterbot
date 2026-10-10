@@ -4,7 +4,7 @@ import { getCurrentGameweek, getLiveData, updateGameweek } from '../api/api';
 
 import { checkForBanter } from './banter';
 import { getStatsAll, getStatsTop5, insertOrUpdateUsage, Stats } from '../api/db/general';
-import { Intents } from 'discord.js';
+import { GatewayIntentBits } from 'discord.js';
 import { env } from '../app-env';
 import { checkForProfeten } from './profeten';
 import { checkForUtil, runAndReport } from './util';
@@ -14,10 +14,11 @@ import { checkForDraft } from './draft';
 
 const client = new Discord.Client({
   intents: [
-    Intents.FLAGS.GUILDS,
-    Intents.FLAGS.GUILD_MESSAGES,
-    Intents.FLAGS.GUILD_MESSAGE_REACTIONS,
-    Intents.FLAGS.GUILD_EMOJIS_AND_STICKERS,
+    GatewayIntentBits.Guilds,
+    GatewayIntentBits.GuildMessages,
+    GatewayIntentBits.GuildMessageReactions,
+    GatewayIntentBits.GuildEmojisAndStickers,
+    GatewayIntentBits.MessageContent,
   ],
 });
 
@@ -34,7 +35,7 @@ const fjoggsGeneralChannelId = '774731038391140375';
 const debugChannelId = '1004475950349693039';
 let liveData = {};
 
-client.once('ready', () => {
+client.once('clientReady', () => {
   console.log(`Logged in as ${client?.user?.tag}!`);
   //@ts-ignore
   channel = client.channels.cache.get(preikChannelId); //preik
@@ -58,7 +59,7 @@ client.once('ready', () => {
 client.login(env.TOKEN);
 
 client.on('interactionCreate', async (interaction) => {
-  if (!interaction.isCommand()) return;
+  if (!interaction.isChatInputCommand()) return;
 });
 
 client.on('messageReactionAdd', async (reaction) => {
