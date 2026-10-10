@@ -1,5 +1,4 @@
 import * as Discord from 'discord.js';
-import fetch from 'node-fetch';
 import {
   AfkonkEntry,
   getAfkonkCounter,
@@ -12,9 +11,6 @@ import {
   RandomEntry,
 } from '../api/db/general';
 import { runAndReport } from './util';
-
-const jsdom = require('jsdom');
-const { JSDOM } = jsdom;
 
 interface PowerPriceResponse {
   price: number;
@@ -288,21 +284,22 @@ export const checkForBanter = (msg: Discord.Message, channel, client, debugChann
   } else if (messageIncludes('!wildride')) {
     runAndReport(
       () => {
-        const manager = 'Amorim';
-        // const response = [
-        //   `Just looking at ${manager}'s wild ride makes me sick`,
-        //   `${manager}'s wild ride looks too intense for me`,
-        //   `${manager}'s wild ride is really good value!`,
-        //   `${manager}'s wild ride was great!`,
-        //   `I'm not getting on ${manager}'s wild ride when it is raining.`,
-        //   `I want to go on something more thrilling than ${manager}'s wild ride`,
-        //   `I'm not paying that much to get on ${manager}'s wild ride`,
-        //   `I want to get off ${manager}'s wild ride`,
-        // ];
-        // const luckyNumber = Math.floor(Math.random() * response.length);
-        // channel.send(response[luckyNumber]);
-        const emoji = client.emojis.cache.find((emoji) => emoji.name === 'feelsbadman');
-        channel.send(`${manager}'s wild ride has crashed ${emoji.toString()}`);
+        const manager = 'Carrick';
+        const response = [
+          `Just looking at ${manager}'s wild ride makes me sick`,
+          `${manager}'s wild ride looks too intense for me`,
+          `${manager}'s wild ride is really good value!`,
+          `${manager}'s wild ride was great!`,
+          `I'm not getting on ${manager}'s wild ride when it is raining.`,
+          `I want to go on something more thrilling than ${manager}'s wild ride`,
+          `I'm not paying that much to get on ${manager}'s wild ride`,
+          `I want to get off ${manager}'s wild ride`,
+        ];
+        const luckyNumber = Math.floor(Math.random() * response.length);
+        channel.send(response[luckyNumber]);
+
+        // const emoji = client.emojis.cache.find((emoji) => emoji.name === 'feelsbadman');
+        // channel.send(`${manager}'s wild ride has crashed ${emoji.toString()}`);
 
         // const emoji = client.emojis.cache.find((emoji) => emoji.name === 'PauseChamp');
         // channel.send(`I've been queuing for ${manager}'s wild ride for ages ${emoji.toString()}`);
@@ -314,26 +311,23 @@ export const checkForBanter = (msg: Discord.Message, channel, client, debugChann
     runAndReport(
       () => {
         const manager = 'Slot';
-        const response = [
-          `Ik word al misselijk van ${manager}'s wilde rit.`,
-          `${manager}'s wilde rit is te heftig voor mij.`,
-          `${manager}'s wilde rit is echt goedkoop!`,
-          `${manager}'s wilde rit was top!`,
-          `Ik ga niet in ${manager}'s wilde rit als het regent.`,
-          `Ik wil in iets spannendere dan ${manager}'s wilde rit.`,
-          `${manager}'s wilde rit is te duur!`,
-          `Ik wil uit ${manager}'s wilde rit!`,
-        ];
-        const luckyNumber = Math.floor(Math.random() * response.length);
-        channel.send(response[luckyNumber]);
-        // const emoji = client.emojis.cache.find((emoji) => emoji.name === 'feelsbadman');
-        // channel.send(`${manager}'s wild ride has crashed ${emoji.toString()}`);
-        //
-        // const emoji = client.emojis.cache.find((emoji) => emoji.name === 'PauseChamp');
-        // channel.send(`I've been queuing for ${manager}'s wild ride for ages ${emoji.toString()}`);
+        // const response = [
+        //   `Ik word al misselijk van ${manager}'s wilde rit.`,
+        //   `${manager}'s wilde rit is te heftig voor mij.`,
+        //   `${manager}'s wilde rit is echt goedkoop!`,
+        //   `${manager}'s wilde rit was top!`,
+        //   `Ik ga niet in ${manager}'s wilde rit als het regent.`,
+        //   `Ik wil in iets spannendere dan ${manager}'s wilde rit.`,
+        //   `${manager}'s wilde rit is te duur!`,
+        //   `Ik wil uit ${manager}'s wilde rit!`,
+        // ];
+        // const luckyNumber = Math.floor(Math.random() * response.length);
+        // channel.send(response[luckyNumber]);
+        const emoji = client.emojis.cache.find((emoji) => emoji.name === 'feelsbadman');
+        channel.send(`${manager}'s wilde rit is gecrasht ${emoji.toString()}`);
       },
       debugChannel,
-      '!wildride'
+      '!wilderit'
     );
   } else if (messageIncludes('!villtur')) {
     runAndReport(
@@ -439,16 +433,6 @@ export const checkForBanter = (msg: Discord.Message, channel, client, debugChann
       },
       debugChannel,
       '!afkonk'
-    );
-  } else if (messageIncludes('!sid')) {
-    runAndReport(
-      () => {
-        // const club = getBilic();
-        // channel.send(`Just nu er sid fan av ${club}`);
-        console.log('hello');
-      },
-      debugChannel,
-      '!sid'
     );
   } else if (messageIncludes('!krysset?')) {
     runAndReport(
@@ -902,18 +886,4 @@ export const checkForBanter = (msg: Discord.Message, channel, client, debugChann
       '!pila'
     );
   }
-};
-
-const getBilic = async () => {
-  const response = await fetch('https://www.transfermarkt.com/slaven-bilic/profil/trainer/3598');
-  const html = await response.text();
-  const dom = await new JSDOM(html);
-  // console.log("dom.window['3176']", dom.window.get("3176"));
-  // const divs = dom.window.document.getElementsByClassName(
-  //   "premium-profil-text"
-  // );
-  // const divs = dom.window.document.querySelector("#\\3176").textContent;
-  const divs = dom.window.document.getElementById('3176').textContent;
-  const currentClub = divs[0].innerText.replace('Current club', ' ').trim();
-  // console.log("currentClub", currentClub);
 };

@@ -71,8 +71,7 @@ export const getAfkonkCounter = (callback: Function) => {
   const db = new DatabaseSync(DB_PATH);
   try {
     const row = db.prepare('SELECT * FROM afkonk WHERE afkonkId = 1').get() as
-      | AfkonkEntry
-      | undefined;
+      AfkonkEntry | undefined;
     callback(row);
   } catch (error) {
     console.log('Something went wrong: ', error);
@@ -84,9 +83,8 @@ export const getAfkonkCounter = (callback: Function) => {
 export const getRandom = (callback: Function) => {
   const db = new DatabaseSync(DB_PATH);
   try {
-    const row = db.prepare('SELECT * FROM random WHERE randomId = 1').get() as
-      | RandomEntry
-      | undefined;
+    const row = db.prepare('SELECT * FROM random WHERE randomId = 1').get() as unknown as
+      RandomEntry | undefined;
     callback(row);
   } catch (error) {
     console.log('Something went wrong: ', error);
@@ -98,9 +96,8 @@ export const getRandom = (callback: Function) => {
 export const getGress = (name: string, callback: Function) => {
   const db = new DatabaseSync(DB_PATH);
   try {
-    const row = db.prepare('SELECT * FROM gress WHERE name = ?').get(name) as
-      | GressEntry
-      | undefined;
+    const row = db.prepare('SELECT * FROM gress WHERE name = ?').get(name) as unknown as
+      GressEntry | undefined;
     callback(row);
   } catch (error) {
     console.log('Something went wrong: ', error);
@@ -128,7 +125,9 @@ export const insertOrUpdateUsage = (name: string) => {
 export const getGressStats = (callback: Function) => {
   const db = new DatabaseSync(DB_PATH);
   try {
-    const rows = db.prepare('SELECT * FROM gress ORDER BY counter DESC').all() as GressEntry[];
+    const rows = db
+      .prepare('SELECT * FROM gress ORDER BY counter DESC')
+      .all() as unknown as GressEntry[];
     callback(rows);
   } catch (error) {
     console.log('Something went wrong: ', error);
@@ -140,7 +139,9 @@ export const getGressStats = (callback: Function) => {
 export const getStatsAll = (callback: Function) => {
   const db = new DatabaseSync(DB_PATH);
   try {
-    const rows = db.prepare('SELECT * FROM emoji ORDER BY usage DESC').all() as RandomEntry[];
+    const rows = db
+      .prepare('SELECT * FROM emoji ORDER BY usage DESC')
+      .all() as unknown as RandomEntry[];
     callback(rows);
   } catch (error) {
     console.log('Something went wrong: ', error);
@@ -154,7 +155,7 @@ export const getStatsTop5 = (callback: Function) => {
   try {
     const rows = db
       .prepare('SELECT * FROM emoji ORDER BY usage DESC LIMIT 5')
-      .all() as RandomEntry[];
+      .all() as unknown as RandomEntry[];
     callback(rows);
   } catch (error) {
     console.log('Something went wrong: ', error);

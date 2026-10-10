@@ -31,7 +31,7 @@ export const changePlayerTotalRep = (playerId: number) => {
 export const getPlayers = (callback: Function) => {
   const db = new DatabaseSync(DB_PATH);
   try {
-    const rows = db.prepare('SELECT * FROM players ORDER BY rep DESC').all() as Player[];
+    const rows = db.prepare('SELECT * FROM players ORDER BY rep DESC').all() as unknown as Player[];
     callback(rows);
   } catch (error) {
     console.log('Something went wrong: ', error);
@@ -47,7 +47,7 @@ export const getStats = (callback: Function) => {
       .prepare(
         'SELECT result, bet, players.name, players.rep FROM bets JOIN challenges ON bets.challengeId = challenges.challengeId JOIN players ON players.playerId = bets.playerId  AND result IS NOT NULL order by players.rep'
       )
-      .all() as Stats[];
+      .all() as unknown as Stats[];
     console.log(rows);
     callback(rows);
   } catch (error) {

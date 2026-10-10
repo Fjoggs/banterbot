@@ -1,5 +1,4 @@
 import * as Discord from 'discord.js';
-import fetch from 'node-fetch';
 import { env } from '../app-env';
 
 const DISCORD_API_URL = 'https://discord.com/api/v9';

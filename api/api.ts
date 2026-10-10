@@ -1,5 +1,3 @@
-import fetch from 'node-fetch';
-import { forEachChild } from 'typescript';
 import {
   GameState,
   Bootstrap,
@@ -33,41 +31,6 @@ export const updateGameweek = async (debugChannel) => {
 };
 
 export const getCurrentGameweek = () => state.currentGameweek;
-
-export const getGraphData = async (): Promise<string[]> => {
-  let stats = [];
-  try {
-    const teams = await getLeagueInfo({});
-    console.log('teams', teams);
-
-    stats = await Promise.all(
-      teams.map(async (fantasyTeam) => {
-        if (fantasyTeam.id !== null) {
-          const team = {
-            name: fantasyTeam.name,
-            id: fantasyTeam.id,
-            scores: [],
-          };
-          const response = await fetch(`${apiUrl}/entry/${fantasyTeam.id}/history`);
-          const historyJson = await response.json();
-          historyJson.history.forEach(
-            (history: { event: number; points: number; total_points: number }) => {
-              team.scores.push({
-                week: history.event,
-                points: history.points,
-                totalPoints: history.total_points,
-              });
-            }
-          );
-          return team;
-        }
-      })
-    );
-  } catch (error) {
-    console.log('blew up');
-  }
-  return stats;
-};
 
 export const getAsyncData = async (debugChannel): Promise<GameState> => {
   try {

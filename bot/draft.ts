@@ -8,7 +8,6 @@ import {
   PlayerElements,
 } from '../types/Fantasy';
 import { runAndReport } from './util';
-import fetch from 'node-fetch';
 
 export interface Standing {
   league_entry: number;

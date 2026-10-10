@@ -1,22 +1,20 @@
 # First image for compiling typescript
-FROM node:current-alpine as build-deps
+FROM node:26-alpine as build-deps
 
 # Create app directory
 WORKDIR /usr/src/app
 
 # Install app dependencies
-COPY package.json yarn.lock ./
-RUN yarn
+COPY package.json package-lock.json ./
+RUN npm ci
 
 # Bundle app source
 COPY . ./
 
 # Compile typescript
-#RUN yarn build
+RUN npm run build
 
 # Install needed dependencies for running server
-RUN yarn install --production
+RUN npm ci --omit=dev
 
-
-# defined in package.json
-CMD [ "yarn", "bot" ]
+CMD [ "node", "dist/bot/bot.js" ]

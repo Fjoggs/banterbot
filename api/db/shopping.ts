@@ -131,7 +131,11 @@ export const updateShopping = async (
   }
 };
 
-export const finishShopping = async (shoppingId: number, completed: boolean, callback: () => void) => {
+export const finishShopping = async (
+  shoppingId: number,
+  completed: boolean,
+  callback: () => void
+) => {
   try {
     await fetch(`${API_URL}/shopping/${shoppingId}/`, {
       method: 'PATCH',

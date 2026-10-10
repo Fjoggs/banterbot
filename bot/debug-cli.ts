@@ -34,7 +34,7 @@ const makeMessage = (content: string) =>
     content,
     channelId: 'debug-channel',
     author: { id: 'debug-user', username: 'DebugUser', bot: false },
-  } as any);
+  }) as any;
 
 // Reproduces bot/bot.ts's printStats verbatim (including its crash-on-empty-usage bug)
 // so commands fail here the same way they'd fail for real. Uses emoji.name directly

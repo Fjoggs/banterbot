@@ -27,7 +27,7 @@ export const initDb = () => {
 export const getReminders = (callback: Function) => {
   const db = new DatabaseSync(DB_PATH);
   try {
-    const rows = db.prepare('SELECT * FROM reminder').all() as Reminder[];
+    const rows = db.prepare('SELECT * FROM reminder').all() as unknown as Reminder[];
     callback(rows);
   } catch (error) {
     console.log('Something went wrong: ', error);
@@ -40,7 +40,9 @@ export const getFutureReminders = (callback: Function) => {
   const now = Date.now();
   const db = new DatabaseSync(DB_PATH);
   try {
-    const rows = db.prepare('SELECT * FROM reminder WHERE time > ?').all(now) as Reminder[];
+    const rows = db
+      .prepare('SELECT * FROM reminder WHERE time > ?')
+      .all(now) as unknown as Reminder[];
     callback(rows);
   } catch (error) {
     console.log('Something went wrong: ', error);
@@ -52,9 +54,8 @@ export const getFutureReminders = (callback: Function) => {
 export const getReminderById = (id: number, callback: Function) => {
   const db = new DatabaseSync(DB_PATH);
   try {
-    const row = db.prepare('SELECT * from reminder WHERE reminder = ?').get(id) as
-      | Reminder
-      | undefined;
+    const row = db.prepare('SELECT * from reminder WHERE reminder = ?').get(id) as unknown as
+      Reminder | undefined;
     callback(row);
   } catch (error) {
     console.log('Something went wrong: ', error);

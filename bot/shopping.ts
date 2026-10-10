@@ -34,7 +34,9 @@ const parseItems = (line: string): ShoppingItemInput[] =>
     });
 
 const formatItems = (items: ShoppingItemInput[]) =>
-  items.map((item) => (item.quantity > 1 ? `${item.name} (${item.quantity})` : item.name)).join(', ');
+  items
+    .map((item) => (item.quantity > 1 ? `${item.name} (${item.quantity})` : item.name))
+    .join(', ');
 
 export const checkForShopping = (msg: Discord.Message, channel, debugChannel) => {
   const messageIsEqual = (phrase: string) => msg.content.toLowerCase() === phrase;
