@@ -1,4 +1,5 @@
 import * as Discord from 'discord.js';
+import { env } from '../app-env';
 import {
   AfkonkEntry,
   getAfkonkCounter,
@@ -754,91 +755,105 @@ export const checkForBanter = (msg: Discord.Message, channel, client, debugChann
     );
   } else if (messageIncludes('!lantime')) {
     runAndReport(
-      () => {
-        const currentDate = new Date();
-        let lanDate = new Date('2026-07-19');
-        const endOfLan = new Date('2026-07-26');
-        const nextLanDate = new Date('2027-07-23');
-
-        const daysUntilLan = Math.ceil(
-          (lanDate.getTime() - currentDate.getTime()) / 1000 / 60 / 60 / 24
-        );
-
-        let emoji;
-        let isLan = false;
-
-        if (daysUntilLan < 1) {
-          emoji = client.emojis.cache.find((emoji) => emoji.name === 'realshit');
-          isLan = true;
-        } else if (daysUntilLan < 30) {
-          emoji = client.emojis.cache.find((emoji) => emoji.name === 'poggers');
-        } else if (daysUntilLan < 40) {
-          emoji = client.emojis.cache.find((emoji) => emoji.name === 'feelsgoodman');
-        } else if (daysUntilLan < 60) {
-          emoji = client.emojis.cache.find((emoji) => emoji.name === 'pogchamp');
-        } else if (daysUntilLan < 90) {
-          emoji = client.emojis.cache.find((emoji) => emoji.name === 'pagchomp');
-        } else if (daysUntilLan < 120) {
-          emoji = client.emojis.cache.find((emoji) => emoji.name === 'yep');
-        } else if (daysUntilLan < 180) {
-          emoji = client.emojis.cache.find((emoji) => emoji.name === 'pausechamp');
-        } else if (daysUntilLan < 250) {
-          emoji = client.emojis.cache.find((emoji) => emoji.name === 'sadscience');
-        } else if (daysUntilLan > 250) {
-          emoji = client.emojis.cache.find((emoji) => emoji.name === 'pepehands');
-        } else if (currentDate.getTime() - endOfLan.getTime() > 0) {
-          isLan = false;
-          lanDate = nextLanDate;
-        }
-        if (
-          previousDate &&
-          currentDate.getSeconds() - previousDate.getSeconds() < 10 &&
-          currentDate.getMinutes() === previousDate.getMinutes()
-        ) {
-          if (isLan) {
-            channel.send(`RIGHT NOW ${emoji.toString()}`);
-          } else {
-            if (hypeCounter === 0) {
-              channel.send(`${daysUntilLan} dager til lan ${emoji.toString()}`);
-              hypeCounter++;
-            } else if (hypeCounter === 1) {
-              channel.send(`${daysUntilLan * 24} timer til lan ${emoji.toString()}`);
-              hypeCounter++;
-            } else if (hypeCounter === 2) {
-              channel.send(`${daysUntilLan * 24 * 60} minutter til lan ${emoji.toString()}`);
-              hypeCounter++;
-            } else if (hypeCounter === 3) {
-              channel.send(`${daysUntilLan * 24 * 60 * 60} sekunder til lan ${emoji.toString()}`);
-              hypeCounter++;
-            } else if (hypeCounter === 4) {
-              channel.send(
-                `${daysUntilLan * 24 * 60 * 60 * 1000} millisekunder til lan ${emoji.toString()}`
-              );
-              hypeCounter++;
-            } else if (hypeCounter === 5) {
-              channel.send(`${Math.ceil(daysUntilLan / 7)} sommerlan til lan ${emoji.toString()}`);
-              hypeCounter++;
-            } else if (hypeCounter === 6) {
-              channel.send(
-                `${Math.ceil(daysUntilLan / 10)} sommerlan+prelan til lan ${emoji.toString()}`
-              );
-              hypeCounter++;
-            } else if (hypeCounter === 7) {
-              channel.send(
-                `${Math.ceil(
-                  daysUntilLan / 13
-                )} sommerlan+prelan+preprelan til lan ${emoji.toString()}`
-              );
-              hypeCounter++;
-            } else if (hypeCounter === 8) {
-              channel.send(`RO NED HYPEN`);
-              hypeCounter = 0;
-            }
+      async () => {
+        try {
+          const response = await fetch(`${env.SOMMERLAN_API_URL}/next-lan/`, {
+            headers: { Authorization: `Bearer ${env.SHOPPING_SERVICE_TOKEN}` },
+          });
+          if (response.status === 404) {
+            // No upcoming LAN: the last one is over and the next isn't added yet.
+            const sadge = client.emojis.cache.find((emoji) => emoji.name === 'sadge');
+            channel.send(`GG ${sadge ? sadge.toString() : ':sadge:'}`);
+            return;
           }
-        } else {
-          channel.send(`${daysUntilLan} dager til lan ${emoji.toString()}`);
+          if (!response.ok) {
+            throw new Error(`next-lan responded ${response.status}`);
+          }
+          const nextLan = await response.json();
+          const currentDate = new Date();
+          const lanDate = new Date(nextLan.start);
+
+          const daysUntilLan = Math.ceil(
+            (lanDate.getTime() - currentDate.getTime()) / 1000 / 60 / 60 / 24
+          );
+
+          let emoji;
+          let isLan = false;
+
+          if (daysUntilLan < 1) {
+            emoji = client.emojis.cache.find((emoji) => emoji.name === 'realshit');
+            isLan = true;
+          } else if (daysUntilLan < 30) {
+            emoji = client.emojis.cache.find((emoji) => emoji.name === 'poggers');
+          } else if (daysUntilLan < 40) {
+            emoji = client.emojis.cache.find((emoji) => emoji.name === 'feelsgoodman');
+          } else if (daysUntilLan < 60) {
+            emoji = client.emojis.cache.find((emoji) => emoji.name === 'pogchamp');
+          } else if (daysUntilLan < 90) {
+            emoji = client.emojis.cache.find((emoji) => emoji.name === 'pagchomp');
+          } else if (daysUntilLan < 120) {
+            emoji = client.emojis.cache.find((emoji) => emoji.name === 'yep');
+          } else if (daysUntilLan < 180) {
+            emoji = client.emojis.cache.find((emoji) => emoji.name === 'pausechamp');
+          } else if (daysUntilLan < 250) {
+            emoji = client.emojis.cache.find((emoji) => emoji.name === 'sadscience');
+          } else if (daysUntilLan > 250) {
+            emoji = client.emojis.cache.find((emoji) => emoji.name === 'pepehands');
+          }
+          if (
+            previousDate &&
+            currentDate.getSeconds() - previousDate.getSeconds() < 10 &&
+            currentDate.getMinutes() === previousDate.getMinutes()
+          ) {
+            if (isLan) {
+              channel.send(`RIGHT NOW ${emoji.toString()}`);
+            } else {
+              if (hypeCounter === 0) {
+                channel.send(`${daysUntilLan} dager til lan ${emoji.toString()}`);
+                hypeCounter++;
+              } else if (hypeCounter === 1) {
+                channel.send(`${daysUntilLan * 24} timer til lan ${emoji.toString()}`);
+                hypeCounter++;
+              } else if (hypeCounter === 2) {
+                channel.send(`${daysUntilLan * 24 * 60} minutter til lan ${emoji.toString()}`);
+                hypeCounter++;
+              } else if (hypeCounter === 3) {
+                channel.send(`${daysUntilLan * 24 * 60 * 60} sekunder til lan ${emoji.toString()}`);
+                hypeCounter++;
+              } else if (hypeCounter === 4) {
+                channel.send(
+                  `${daysUntilLan * 24 * 60 * 60 * 1000} millisekunder til lan ${emoji.toString()}`
+                );
+                hypeCounter++;
+              } else if (hypeCounter === 5) {
+                channel.send(
+                  `${Math.ceil(daysUntilLan / 7)} sommerlan til lan ${emoji.toString()}`
+                );
+                hypeCounter++;
+              } else if (hypeCounter === 6) {
+                channel.send(
+                  `${Math.ceil(daysUntilLan / 10)} sommerlan+prelan til lan ${emoji.toString()}`
+                );
+                hypeCounter++;
+              } else if (hypeCounter === 7) {
+                channel.send(
+                  `${Math.ceil(
+                    daysUntilLan / 13
+                  )} sommerlan+prelan+preprelan til lan ${emoji.toString()}`
+                );
+                hypeCounter++;
+              } else if (hypeCounter === 8) {
+                channel.send(`RO NED HYPEN`);
+                hypeCounter = 0;
+              }
+            }
+          } else {
+            channel.send(`${daysUntilLan} dager til lan ${emoji.toString()}`);
+          }
+          previousDate = currentDate;
+        } catch (error) {
+          debugChannel.send(`Command !lantime failed with error: ${error}`);
         }
-        previousDate = currentDate;
       },
       debugChannel,
       '!lantime'
